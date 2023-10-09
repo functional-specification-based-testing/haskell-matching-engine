@@ -94,8 +94,8 @@ uniq [] = []
 analyzePath :: String -> String -> String
 analyzePath trace path = 
   case matchRegex (mkRegex regexString) trace of
-       Just _ -> "\ESC[32mCovered: " ++ path
-       _ -> "\ESC[31mNotCovered: " ++ path
+       Just _ -> "Covered: " ++ path
+       _ -> "NotCovered: " ++ path
   where 
     regexString = L.replace "->" ".*"  rParReplace
     rParReplace = L.replace ")" "[)]" lParReplace
