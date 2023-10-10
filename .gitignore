@@ -3,10 +3,12 @@ AllB1Sn
 GetTCTraces
 testcases/sink
 
+
 dist
 dist-*
 cabal-dev
 *.o
+*.out
 *.hi
 *.hie
 *.chi

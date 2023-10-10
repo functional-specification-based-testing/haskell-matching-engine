@@ -5,6 +5,7 @@ import           System.IO
 
 import           Domain.Parser
 import           Infra.Shahlaa
+import qualified DataFlow.HieDUJungleGenerator as DF
 
 
 main :: IO()
@@ -33,3 +34,10 @@ main = do
         else putStrLn $ fCoverageInOrder $ coverage tc
 
     hClose handle
+
+    (totalCount, coveredCount) <- DF.coverage "./.hie" "./run.out" 
+    putStrLn $ "coveredCount: " ++ show coveredCount
+    putStrLn $ "totalcount: " ++ show totalCount
+    
+    dfCoverage <- DF.analyze "./.hie" "./run.out"  
+    putStrLn $ dfCoverage
