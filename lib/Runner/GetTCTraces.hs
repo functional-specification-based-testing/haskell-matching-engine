@@ -3,8 +3,8 @@ import           System.Environment
 import           System.Exit
 import           System.IO
 
-import           Domain.Parser
-import           Infra.Shahlaa
+import           Parser
+import           Shahlaa
 
 import           Data.Time
 

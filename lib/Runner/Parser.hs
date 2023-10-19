@@ -1,4 +1,4 @@
-module Domain.Parser
+module Parser
     ( genRequest
     , indexRequests
     ) where

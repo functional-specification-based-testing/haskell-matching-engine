@@ -1,4 +1,4 @@
-module Domain.Printer
+module Printer
     ( fRequest
     , fResponse
     ) where

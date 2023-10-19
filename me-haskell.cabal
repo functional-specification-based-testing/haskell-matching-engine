@@ -47,12 +47,9 @@ extra-source-files:  CHANGELOG.md
 -- Constraint on the version of Cabal needed to build this package.
 cabal-version:       >=1.10
 
-executable GetTCTraces
-  -- .hs or .lhs file containing the Main module.
-  main-is:             GetTCTraces.hs
-
+library MeDomain
   -- Modules included in this executable, other than Main.
-  other-modules:
+  exposed-modules:
     Decorators.CreditLimit
     Decorators.FillAndKill
     Decorators.MinQuantity
@@ -62,11 +59,8 @@ executable GetTCTraces
     Decorators.Validation
     Domain.ME
     Domain.MEService
-    Domain.Parser
-    Domain.Printer
     Infra.Coverage
     Infra.Decorator
-    Infra.Shahlaa
 
   hs-source-dirs:      src
 
@@ -78,7 +72,7 @@ executable GetTCTraces
               --disable-optimization
               -fplugin=DataFlow.Instrumentation
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.12, containers >=0.6 && <0.7, transformers >=0.5 && <0.6, random >=1.2 && <1.3, DataFlow, time
+  build-depends:       base >=4.12, containers >=0.6 && <0.7, transformers >=0.5 && <0.6, random >=1.2 && <1.3, DataFlow
 
   -- Directories containing source files.
   -- hs-source-dirs:
@@ -86,6 +80,31 @@ executable GetTCTraces
   -- Base language which the package is written in.
   default-language:    Haskell2010
 
+
+
+executable GetTCTraces
+  -- .hs or .lhs file containing the Main module.
+  main-is:             GetTCTraces.hs
+
+  -- Modules included in this executable, other than Main.
+  other-modules:
+    Parser
+    Printer
+    Shahlaa
+
+  hs-source-dirs:      lib/Runner
+
+  -- LANGUAGE extensions used by modules in this package.
+  other-extensions:    ExplicitForAll
+  
+  -- Other library packages from which modules are imported.
+  build-depends:       base >=4.12, containers >=0.6 && <0.7, transformers >=0.5 && <0.6, random >=1.2 && <1.3, time, MeDomain
+
+  -- Directories containing source files.
+  -- hs-source-dirs:
+
+  -- Base language which the package is written in.
+  default-language:    Haskell2010
 
 library DataFlow
     exposed-modules:

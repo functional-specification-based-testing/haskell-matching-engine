@@ -74,14 +74,14 @@ pluginImpl ms tcGblEnv = do
 
 addExprTrace :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
 addExprTrace (GHC.L loc (GHC.HsIf p cond first second)) = do
-  new_first <- injectTrace first
-  new_second <- injectTrace second
+  new_first <- injectTrace "D:" first
+  new_second <- injectTrace "D:" second
   return (GHC.L loc (GHC.HsIf p cond new_first new_second))
 
-addExprTrace (GHC.L loc (GHC.HsApp p func arg)) = 
+addExprTrace (GHC.L loc (GHC.HsApp p func arg@(GHC.L _ (GHC.HsVar _ _)))) = 
   --T.trace (GHC.renderWithContext GHC.defaultSDocContext( GHC.ppr loc )) $
   do
-  new_arg <- injectTrace arg
+  new_arg <- injectTrace "U:" arg
   return (GHC.L loc (GHC.HsApp p func new_arg))
 
 addExprTrace other = 
@@ -89,7 +89,7 @@ addExprTrace other =
 
 addMatchTrace :: GHC.LGRHS GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.LGRHS GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
 addMatchTrace (GHC.L loc (GHC.GRHS p g body)) = do
-  new_body <- injectTrace body
+  new_body <- injectTrace "D:" body
   return (GHC.L loc (GHC.GRHS p g new_body))
 
 addMatchTrace other = 
@@ -97,14 +97,14 @@ addMatchTrace other =
 
 addBindTrace :: GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
 addBindTrace (GHC.BindStmt p g body) = do
-  new_body <- injectTrace body
+  new_body <- injectTrace "D:" body
   return (GHC.BindStmt p g new_body)
 
 addBindTrace other = 
   return other
 
-injectTrace :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
-injectTrace expr@(GHC.L GHC.SrcSpanAnn{GHC.locA=(GHC.RealSrcSpan loc _)} _) = do
+injectTrace :: String -> GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
+injectTrace flag expr@(GHC.L GHC.SrcSpanAnn{GHC.locA=(GHC.RealSrcSpan loc _)} _) = do
   Just exprT <-
     typeOfExpr expr
 
@@ -118,7 +118,7 @@ injectTrace expr@(GHC.L GHC.SrcSpanAnn{GHC.locA=(GHC.RealSrcSpan loc _)} _) = do
         fmap ( GHC.convertToHsExpr GHC.Generated GHC.noSrcSpan )
           $ liftIO
           $ TH.runQ
-          $ [| trace ppWhere |]
+          $ [| trace (flag ++ ppWhere) |]
 
   ( traceExprRn, _ ) <-
     GHC.rnLExpr traceExprPs
@@ -156,7 +156,7 @@ injectTrace expr@(GHC.L GHC.SrcSpanAnn{GHC.locA=(GHC.RealSrcSpan loc _)} _) = do
 
   return newBody
 
-injectTrace other = 
+injectTrace _ other = 
   return other
 
 typeOfExpr :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM ( Maybe GHC.Type )
