@@ -10,7 +10,7 @@ import qualified Data.List.Extra as L
 import qualified DataFlow.HieASTGraphGenerator as AG
 import qualified GHC.Utils.Outputable as GHC
 
-import Debug.Trace
+import qualified Debug.Trace as T
 
 
 data GraphNode = DefNode String [GraphNode] | UseNode Span [String] [GraphNode]
@@ -20,24 +20,25 @@ convertToGraphNode :: AG.AST -> GraphNode -> GraphNode
 convertToGraphNode (AG.AST _ "VarPat"  _ [name]  ) (DefNode defName children) = DefNode defName ((DefNode name []):children)
 
 convertToGraphNode (AG.AST s ""        _ [name]  ) (DefNode _ children) = (DefNode name children)
-convertToGraphNode (AG.AST _ "FunBind" children _) (DefNode name nodeChildren) = DefNode name (funcNode:nodeChildren)
+convertToGraphNode (AG.AST s "FunBind" children _) (DefNode name nodeChildren) = DefNode name (funcNode:nodeChildren)
   where funcNode = foldr convertToGraphNode (DefNode "" []) children
-        grhsSkipper (AG.AST _ "GRHS"  ghrsChildren  _   ) graphNode = foldr convertToGraphNode graphNode ghrsChildren
-        grhsSkipper ast graphNode = convertToGraphNode ast graphNode
+
+convertToGraphNode (AG.AST s "FunBind" children _) (UseNode span uses nodeChildren) = UseNode span uses (funcNode:nodeChildren)
+  where funcNode = foldr convertToGraphNode (DefNode "" []) children
 
 convertToGraphNode (AG.AST _ "HsVar" _      [name]) (UseNode s uses children) = UseNode s (name:uses) children 
 convertToGraphNode (AG.AST s "HsIf"  [cond, first@(AG.AST fs _ _ _), second@(AG.AST ss _ _ _)] _ ) graphNode = 
   addChild (addChild condNode firstNode) secondNode
-  where 
+  where
     firstNode  = convertToGraphNode first  (UseNode fs [] [])
     secondNode = convertToGraphNode second (UseNode ss [] [])
     condNode = convertToGraphNode cond graphNode
     
-convertToGraphNode (AG.AST _ "GRHS"  children  _   ) graphNode = addChild graphNode newNode
+convertToGraphNode (AG.AST _ "GRHS"  children@(first:_)  _   ) graphNode = addChild graphNode newNode
   where 
-    (AG.AST s _ _ _) = last children
+    (AG.AST s _ _ _) = first
     newNode = foldr convertToGraphNode (UseNode s [] []) children
-convertToGraphNode (AG.AST s _     children  _  )   graphNode =  (foldr convertToGraphNode graphNode children)
+convertToGraphNode (AG.AST s a     children  _  )   graphNode = (foldr convertToGraphNode graphNode children)
 
 addChild :: GraphNode -> GraphNode -> GraphNode
 addChild (DefNode name children) newChild  = DefNode name (newChild:children)
@@ -116,24 +117,24 @@ analyzeCoverage trace path =
 processTrace :: [String] -> [String] -> M.Map String GraphNode -> GraphNode -> [String]
 processTrace _ [] _ _ = []
 
-processTrace path trace defMap (DefNode _ children) = uniq $ concat $ fmap (processTrace [] trace defMap) children
+processTrace path trace defMap (DefNode _ children) = uniq  $ concat $ fmap (processTrace path trace defMap) children
 
 processTrace path (current:rest) defMap (UseNode span usedSymbols []) = case current of 
-    ppWhere -> (L.intercalate "->" nextPath):(concat $ fmap createPath usedSymbols)
+    ppWhere -> [L.intercalate "->" nextPath]
     _ -> []
   where 
     createPath use = case M.lookup use defMap of
-      Just node -> processTrace nextPath rest defMap node
+      Just node -> processTrace [] rest defMap node
       _ -> []
     ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
     nextPath = path ++ [current]
 
 processTrace path (current:rest) defMap (UseNode span usedSymbols children) = case current of 
-    ppWhere -> concat $ (fmap (processTrace (path ++ [current]) rest defMap) children) ++ (fmap createPath usedSymbols)
+    ppWhere -> uniq $ concat $ (fmap (processTrace (path ++ [current]) rest defMap) children) ++ (fmap createPath usedSymbols)
     _ -> []
   where 
     createPath use = case M.lookup use defMap of
-      Just node -> processTrace nextPath rest defMap node
+      Just node -> processTrace [] rest defMap node
       _ -> []
     ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
     nextPath = path ++ [current]
@@ -151,7 +152,8 @@ analyze hieDir runFile = do
     node = DefNode "ALL" graphNodes
     defMap = createDefMap node M.empty
     trace = lines runData
-  return $ L.intercalate "\n" $ processTrace [] trace defMap node
+    (result, (i:res)) = getCoveredPath [] defMap node ([], trace)
+  return $ (show i) ++ (L.intercalate "\n" $ uniq $ result)
 
 coverage :: String -> String -> IO (Int, Int)
 coverage hieDir runFile = do
@@ -169,3 +171,43 @@ coverage hieDir runFile = do
     totalCount = length coverageData
     coveredCount = length $ filter (== True) coverageData
   return (totalCount, coveredCount)
+
+getCoveredPath :: [String] -> M.Map String GraphNode -> GraphNode -> ([String], [String]) -> ([String], [String])
+
+getCoveredPath path defMap node@(DefNode name children) (coveredPath, trace) =
+  if length newTrace == length trace
+    then (newCoveredPath, newTrace)
+    else getCoveredPath path defMap node (newCoveredPath, newTrace)
+  where 
+    (newCoveredPath, newTrace) = foldr (getCoveredPath path defMap) (coveredPath, trace) children
+
+getCoveredPath path defMap node@(UseNode span uses []) (coveredPath, trace@(current:rest)) =
+  if current == ppWhere 
+    then 
+      --T.trace ("A2:" ++ (show path) ++ ppWhere ++ (show uses) ++ (show defNodes)) $ 
+      ((L.intercalate "->" (path ++ [ppWhere])):resultCoveredPath, resultTrace)
+    else (coveredPath, trace)
+  where 
+    (resultCoveredPath, resultTrace) = if length newTrace + 1 == length trace 
+      then (newCoveredPath, newTrace)
+      else getCoveredPath path defMap node (newCoveredPath, current:newTrace)
+    (newCoveredPath, newTrace) = foldr (getCoveredPath [ppWhere] defMap) (coveredPath, rest) defNodes
+    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
+    defNodes = M.elems $ M.filterWithKey (\k -> \_ -> k `elem` uses) defMap    
+
+getCoveredPath path defMap node@(UseNode span uses children) (coveredPath, trace@(current:rest)) =
+  if current == ppWhere 
+    then 
+      --T.trace ("B1:" ++ (show path) ++ ppWhere ++ (show uses) ++ (show defNodes)) 
+      (resultCoveredPath, resultTrace)
+    else (coveredPath, trace)
+  where 
+    (resultCoveredPath, resultTrace) = if length newTrace + 1 == length trace 
+      then (newCoveredPath, newTrace)
+      else getCoveredPath path defMap node (newCoveredPath, current:newTrace)
+    (newCoveredPath, newTrace) = foldr (getCoveredPath (path ++ [ppWhere]) defMap) (useCoveredPath, useTrace) children
+    (useCoveredPath, useTrace) = foldr (getCoveredPath [ppWhere] defMap) (coveredPath, rest) defNodes
+    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
+    defNodes = M.elems $ M.filterWithKey (\k -> \_ -> k `elem` uses) defMap    
+
+getCoveredPath _ _ _ (coveredPath, []) = (coveredPath, [])

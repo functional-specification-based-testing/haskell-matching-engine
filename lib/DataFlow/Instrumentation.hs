@@ -10,6 +10,8 @@ module DataFlow.Instrumentation ( plugin ) where
 import Data.Traversable ( for )
 import Control.Monad.IO.Class ( liftIO )
 import Data.Foldable ( toList )
+
+import Control.DeepSeq
   
 -- ghc
 import GHC.Data.Bag
@@ -42,6 +44,7 @@ import qualified GHC.Parser.Annotation as GHC
 
 import qualified GHC.Core.Utils as CoreUtils
 
+import qualified Debug.Trace as T
 --syb
 import Data.Generics ( everywhereM, mkM )
 
@@ -65,7 +68,8 @@ pluginImpl :: GHC.ModSummary -> GHC.TcGblEnv -> GHC.TcM GHC.TcGblEnv
 pluginImpl ms tcGblEnv = do
   let tcg_binds = GHC.tcg_binds tcGblEnv
   expr_tcg_binds <- mkM addExprTrace `everywhereM` tcg_binds
-  new_tcg_binds <- mkM addMatchTrace `everywhereM` expr_tcg_binds
+  bind_tcg_binds <- mkM addBindTrace `everywhereM` expr_tcg_binds
+  new_tcg_binds <- mkM addMatchTrace `everywhereM` bind_tcg_binds
   return tcGblEnv { GHC.tcg_binds = new_tcg_binds}
 
 addExprTrace :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
@@ -73,6 +77,12 @@ addExprTrace (GHC.L loc (GHC.HsIf p cond first second)) = do
   new_first <- injectTrace first
   new_second <- injectTrace second
   return (GHC.L loc (GHC.HsIf p cond new_first new_second))
+
+addExprTrace (GHC.L loc (GHC.HsApp p func arg)) = 
+  --T.trace (GHC.renderWithContext GHC.defaultSDocContext( GHC.ppr loc )) $
+  do
+  new_arg <- injectTrace arg
+  return (GHC.L loc (GHC.HsApp p func new_arg))
 
 addExprTrace other = 
   return other
@@ -83,6 +93,14 @@ addMatchTrace (GHC.L loc (GHC.GRHS p g body)) = do
   return (GHC.L loc (GHC.GRHS p g new_body))
 
 addMatchTrace other = 
+  return other
+
+addBindTrace :: GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
+addBindTrace (GHC.BindStmt p g body) = do
+  new_body <- injectTrace body
+  return (GHC.BindStmt p g new_body)
+
+addBindTrace other = 
   return other
 
 injectTrace :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
