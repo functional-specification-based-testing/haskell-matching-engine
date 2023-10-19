@@ -113,6 +113,31 @@ analyzeCoverage trace path =
     lParReplace = L.replace "(" "[(]" slashReplace
     slashReplace = L.replace "\\" "[\\]" path
 
+processTrace :: [String] -> [String] -> M.Map String GraphNode -> GraphNode -> [String]
+processTrace _ [] _ _ = []
+
+processTrace path trace defMap (DefNode _ children) = uniq $ concat $ fmap (processTrace [] trace defMap) children
+
+processTrace path (current:rest) defMap (UseNode span usedSymbols []) = case current of 
+    ppWhere -> (L.intercalate "->" nextPath):(concat $ fmap createPath usedSymbols)
+    _ -> []
+  where 
+    createPath use = case M.lookup use defMap of
+      Just node -> processTrace nextPath rest defMap node
+      _ -> []
+    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
+    nextPath = path ++ [current]
+
+processTrace path (current:rest) defMap (UseNode span usedSymbols children) = case current of 
+    ppWhere -> concat $ (fmap (processTrace (path ++ [current]) rest defMap) children) ++ (fmap createPath usedSymbols)
+    _ -> []
+  where 
+    createPath use = case M.lookup use defMap of
+      Just node -> processTrace nextPath rest defMap node
+      _ -> []
+    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
+    nextPath = path ++ [current]
+
 analyze :: String -> String -> IO (String)
 analyze hieDir runFile = do
   files <- getFilesRecursive hieDir
@@ -123,9 +148,10 @@ analyze hieDir runFile = do
   let 
     concatedAsts = concat asts
     graphNodes = fmap convertToGraphNodeInit concatedAsts
-    duPath = uniq $ createDefUsePath (DefNode "ALL" graphNodes)
-    trace = L.intercalate "->" (lines runData)
-  return $ (L.intercalate "\n" $ fmap (analyzePath trace) duPath) ++ "\n"
+    node = DefNode "ALL" graphNodes
+    defMap = createDefMap node M.empty
+    trace = lines runData
+  return $ L.intercalate "\n" $ processTrace [] trace defMap node
 
 coverage :: String -> String -> IO (Int, Int)
 coverage hieDir runFile = do

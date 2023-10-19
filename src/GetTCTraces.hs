@@ -2,11 +2,11 @@ import           Control.Monad
 import           System.Environment
 import           System.Exit
 import           System.IO
+import           Data.Time
 
 import           Domain.Parser
 import           Infra.Shahlaa
 import qualified DataFlow.HieDUJungleGenerator as DF
-
 
 main :: IO()
 main = do
@@ -35,9 +35,17 @@ main = do
 
     hClose handle
 
-    (totalCount, coveredCount) <- DF.coverage "./.hie" "./run.out" 
-    putStrLn $ "coveredCount: " ++ show coveredCount
-    putStrLn $ "totalcount: " ++ show totalCount
+    startTime <- getCurrentTime
+
+    -- (totalCount, coveredCount) <- DF.coverage "./.hie" "./run.out" 
+    -- putStrLn $ "coveredCount: " ++ show coveredCount
+    -- putStrLn $ "totalcount: " ++ show totalCount
     
     dfCoverage <- DF.analyze "./.hie" "./run.out"  
     putStrLn $ dfCoverage
+
+    endTime <- getCurrentTime
+    let diff = diffUTCTime endTime startTime
+    putStrLn $ "Execution Time: " ++ (show diff)
+
+    
