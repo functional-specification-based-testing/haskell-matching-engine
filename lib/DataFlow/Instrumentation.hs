@@ -21,6 +21,7 @@ import GHC.Tc.Gen.Expr
 import GHC.Iface.Env
 import GHC.Parser.Annotation
 import System.IO.Unsafe
+import System.IO
 
 import qualified GHC
 import qualified GHC.ThToHs as GHC
@@ -60,7 +61,7 @@ unsafeAddr a = I# (word2Int# (aToWord# (unsafeCoerce# a)))
 
 trace :: String -> String -> a -> a
 trace flag input body = unsafePerformIO $ do
- appendFile "run.out" $! ((show $ unsafeAddr $! body) ++ "#" ++ flag ++ "#" ++  input ++ "\n")
+ hPutStrLn stderr $! ((show $ unsafeAddr $! body) ++ "," ++ flag ++ "," ++  input)
  return body
 
 plugin :: GHC.Plugin

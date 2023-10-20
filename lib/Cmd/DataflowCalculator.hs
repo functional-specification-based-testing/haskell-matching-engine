@@ -10,8 +10,8 @@ main = do
     -- putStrLn $ "coveredCount: " ++ show coveredCount
     -- putStrLn $ "totalcount: " ++ show totalCount
 
-    dfCoverage <- DF.analyze "./.hie" "./run.out"  
-    putStrLn $ dfCoverage
+    dfCoverage <- DF.coverage "./.hie" "./run.out"  
+    putStrLn $ show dfCoverage
 
     endTime <- getCurrentTime
     let diff = diffUTCTime endTime startTime

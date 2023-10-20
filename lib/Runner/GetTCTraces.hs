@@ -14,11 +14,6 @@ main = do
     startTime <- getCurrentTime
     args <-     getArgs
 
-    when (length args /= 2) ( do
-        progName <- getProgName
-        hPutStrLn stderr $ "Usage:\t./" ++ progName ++ " --trades|--traces <input_file>"
-        exitFailure
-        )
     let func = head args
     let addr = args !! 1
     when (func /= "--trades" && func /= "--traces")
