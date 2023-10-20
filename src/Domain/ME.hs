@@ -50,7 +50,7 @@ type ShareholderID = Int
 type CreditInfo = Map.Map BrokerID Int
 type OwnershipInfo = Map.Map ShareholderID Int
 
-data Side = Buy | Sell deriving (Show, Eq, Ord)
+data Side = Buy | Sell deriving (Show, Eq)
 
 data Order = LimitOrder
     { oid         :: OrderID

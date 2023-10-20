@@ -10,7 +10,7 @@ import qualified Data.List.Extra as L
 import qualified DataFlow.HieASTGraphGenerator as AG
 import qualified GHC.Utils.Outputable as GHC
 
-import Debug.Trace
+import qualified Debug.Trace as T
 
 
 data GraphNode = DefNode String [GraphNode] | UseNode Span [String] [GraphNode]
@@ -20,24 +20,25 @@ convertToGraphNode :: AG.AST -> GraphNode -> GraphNode
 convertToGraphNode (AG.AST _ "VarPat"  _ [name]  ) (DefNode defName children) = DefNode defName ((DefNode name []):children)
 
 convertToGraphNode (AG.AST s ""        _ [name]  ) (DefNode _ children) = (DefNode name children)
-convertToGraphNode (AG.AST _ "FunBind" children _) (DefNode name nodeChildren) = DefNode name (funcNode:nodeChildren)
+convertToGraphNode (AG.AST s "FunBind" children _) (DefNode name nodeChildren) = DefNode name (funcNode:nodeChildren)
   where funcNode = foldr convertToGraphNode (DefNode "" []) children
-        grhsSkipper (AG.AST _ "GRHS"  ghrsChildren  _   ) graphNode = foldr convertToGraphNode graphNode ghrsChildren
-        grhsSkipper ast graphNode = convertToGraphNode ast graphNode
+
+convertToGraphNode (AG.AST s "FunBind" children _) (UseNode span uses nodeChildren) = UseNode span uses (funcNode:nodeChildren)
+  where funcNode = foldr convertToGraphNode (DefNode "" []) children
 
 convertToGraphNode (AG.AST _ "HsVar" _      [name]) (UseNode s uses children) = UseNode s (name:uses) children 
 convertToGraphNode (AG.AST s "HsIf"  [cond, first@(AG.AST fs _ _ _), second@(AG.AST ss _ _ _)] _ ) graphNode = 
   addChild (addChild condNode firstNode) secondNode
-  where 
+  where
     firstNode  = convertToGraphNode first  (UseNode fs [] [])
     secondNode = convertToGraphNode second (UseNode ss [] [])
     condNode = convertToGraphNode cond graphNode
     
-convertToGraphNode (AG.AST _ "GRHS"  children  _   ) graphNode = addChild graphNode newNode
+convertToGraphNode (AG.AST _ "GRHS"  children@(first:_)  _   ) graphNode = addChild graphNode newNode
   where 
-    (AG.AST s _ _ _) = last children
+    (AG.AST s _ _ _) = first
     newNode = foldr convertToGraphNode (UseNode s [] []) children
-convertToGraphNode (AG.AST s _     children  _  )   graphNode =  (foldr convertToGraphNode graphNode children)
+convertToGraphNode (AG.AST s a     children  _  )   graphNode = (foldr convertToGraphNode graphNode children)
 
 addChild :: GraphNode -> GraphNode -> GraphNode
 addChild (DefNode name children) newChild  = DefNode name (newChild:children)
@@ -113,6 +114,31 @@ analyzeCoverage trace path =
     lParReplace = L.replace "(" "[(]" slashReplace
     slashReplace = L.replace "\\" "[\\]" path
 
+processTrace :: [String] -> [String] -> M.Map String GraphNode -> GraphNode -> [String]
+processTrace _ [] _ _ = []
+
+processTrace path trace defMap (DefNode _ children) = uniq  $ concat $ fmap (processTrace path trace defMap) children
+
+processTrace path (current:rest) defMap (UseNode span usedSymbols []) = case current of 
+    ppWhere -> [L.intercalate "->" nextPath]
+    _ -> []
+  where 
+    createPath use = case M.lookup use defMap of
+      Just node -> processTrace [] rest defMap node
+      _ -> []
+    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
+    nextPath = path ++ [current]
+
+processTrace path (current:rest) defMap (UseNode span usedSymbols children) = case current of 
+    ppWhere -> uniq $ concat $ (fmap (processTrace (path ++ [current]) rest defMap) children) ++ (fmap createPath usedSymbols)
+    _ -> []
+  where 
+    createPath use = case M.lookup use defMap of
+      Just node -> processTrace [] rest defMap node
+      _ -> []
+    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
+    nextPath = path ++ [current]
+
 analyze :: String -> String -> IO (String)
 analyze hieDir runFile = do
   files <- getFilesRecursive hieDir
@@ -123,9 +149,11 @@ analyze hieDir runFile = do
   let 
     concatedAsts = concat asts
     graphNodes = fmap convertToGraphNodeInit concatedAsts
-    duPath = uniq $ createDefUsePath (DefNode "ALL" graphNodes)
-    trace = L.intercalate "->" (lines runData)
-  return $ (L.intercalate "\n" $ fmap (analyzePath trace) duPath) ++ "\n"
+    node = DefNode "ALL" graphNodes
+    defMap = createDefMap node M.empty
+    trace = lines runData
+    result = getCoveredPath trace
+  return $ (L.intercalate "\n" $ uniq $ result)
 
 coverage :: String -> String -> IO (Int, Int)
 coverage hieDir runFile = do
@@ -143,3 +171,45 @@ coverage hieDir runFile = do
     totalCount = length coverageData
     coveredCount = length $ filter (== True) coverageData
   return (totalCount, coveredCount)
+
+isDef :: [String] -> Bool
+isDef (_:"D:":_) = True
+isDef _ = False
+
+getLoc :: [String] -> String
+getLoc [_,_,loc] = loc
+getLoc _ = []
+
+isSameValue :: [String] -> [String] -> Bool
+isSameValue (addr1:_) (addr2:_) = addr1 == addr2
+isSameValue _ _ = False
+
+splitString :: Char -> String -> [String]
+splitString _ [] = []
+splitString sep str = 
+    let (left, right) = break (==sep) str 
+    in left : splitString sep (drop 1 right)
+
+addToDefMap :: [[String]] -> M.Map String [String] -> M.Map String [String]
+addToDefMap items@(first:_) pathMap = M.insert key value pathMap 
+  where
+    (key:_) = first
+    value = reverse $ map getLoc items
+
+addDefDataToUse :: M.Map String [String] -> [String] -> String
+addDefDataToUse defMap usage = case defPath of
+    Just def -> L.intercalate ">" $ loc:def
+    Nothing -> []
+  where 
+    (key:_) = usage
+    loc = getLoc usage
+    defPath = M.lookup key defMap
+
+getCoveredPath :: [String] -> [String]
+getCoveredPath trace = uniq $ map (addDefDataToUse defMap) usageData 
+  where 
+    splitedData = map (splitString '#') trace
+    deinfintionData = L.filter isDef splitedData
+    usageData = L.filter (not . isDef) splitedData
+    groupedData = L.groupBy isSameValue splitedData
+    defMap = foldr addToDefMap M.empty groupedData

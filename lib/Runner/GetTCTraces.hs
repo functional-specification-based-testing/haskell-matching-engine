@@ -3,14 +3,16 @@ import           System.Environment
 import           System.Exit
 import           System.IO
 
-import           Domain.Parser
-import           Infra.Shahlaa
-import qualified DataFlow.HieDUJungleGenerator as DF
+import           Parser
+import           Shahlaa
 
+import           Data.Time
 
+f a = a
 main :: IO()
 main = do
-    args <- getArgs
+    startTime <- getCurrentTime
+    args <-     getArgs
 
     when (length args /= 2) ( do
         progName <- getProgName
@@ -32,12 +34,9 @@ main = do
         then putStrLn $ fTestCase tc
         -- else putStrLn $ fCoverage $ coverage tc
         else putStrLn $ fCoverageInOrder $ coverage tc
-
+    
     hClose handle
 
-    (totalCount, coveredCount) <- DF.coverage "./.hie" "./run.out" 
-    putStrLn $ "coveredCount: " ++ show coveredCount
-    putStrLn $ "totalcount: " ++ show totalCount
-    
-    dfCoverage <- DF.analyze "./.hie" "./run.out"  
-    putStrLn $ dfCoverage
+    endTime <- getCurrentTime
+    let diff = diffUTCTime endTime startTime
+    putStrLn $ "Execution Time: " ++ (show diff)

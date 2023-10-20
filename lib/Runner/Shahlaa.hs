@@ -1,4 +1,4 @@
-module Infra.Shahlaa
+module Shahlaa
     ( addOracle
     , coverage
     , fTestCase
@@ -13,7 +13,7 @@ import           Text.Printf
 
 import           Domain.ME
 import           Domain.MEService
-import           Domain.Printer
+import           Printer
 import           Infra.Coverage
 
 
