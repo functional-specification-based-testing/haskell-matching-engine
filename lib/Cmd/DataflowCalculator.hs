@@ -17,10 +17,10 @@ main = do
     let diff = diffUTCTime endTime startTime
     putStrLn $ "Execution Time: " ++ (show diff)
 
-    ast <- HA.printAsts "./.hie/Domain/Parser.hie"
+    --ast <- HA.printAsts "./.hie/Domain/Parser.hie"
     --ast <- HA.printAsts "./.hie/Main.hie"
     --ast <- HA.loadAST "./.hie/Main.hie"
     --putStrLn $ show $ foldr DF.convertToGraphNode (DF.DefNode "" []) ast 
-    putStrLn ast
+    --putStrLn ast
 
     

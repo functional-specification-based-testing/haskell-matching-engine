@@ -152,8 +152,8 @@ analyze hieDir runFile = do
     node = DefNode "ALL" graphNodes
     defMap = createDefMap node M.empty
     trace = lines runData
-    (result, (i:res)) = getCoveredPath [] defMap node ([], trace)
-  return $ (show i) ++ (L.intercalate "\n" $ uniq $ result)
+    result = getCoveredPath trace
+  return $ (L.intercalate "\n" $ uniq $ result)
 
 coverage :: String -> String -> IO (Int, Int)
 coverage hieDir runFile = do
@@ -172,42 +172,44 @@ coverage hieDir runFile = do
     coveredCount = length $ filter (== True) coverageData
   return (totalCount, coveredCount)
 
-getCoveredPath :: [String] -> M.Map String GraphNode -> GraphNode -> ([String], [String]) -> ([String], [String])
+isDef :: [String] -> Bool
+isDef (_:"D:":_) = True
+isDef _ = False
 
-getCoveredPath path defMap node@(DefNode name children) (coveredPath, trace) =
-  if length newTrace == length trace
-    then (newCoveredPath, newTrace)
-    else getCoveredPath path defMap node (newCoveredPath, newTrace)
+getLoc :: [String] -> String
+getLoc [_,_,loc] = loc
+getLoc _ = []
+
+isSameValue :: [String] -> [String] -> Bool
+isSameValue (addr1:_) (addr2:_) = addr1 == addr2
+isSameValue _ _ = False
+
+splitString :: Char -> String -> [String]
+splitString _ [] = []
+splitString sep str = 
+    let (left, right) = break (==sep) str 
+    in left : splitString sep (drop 1 right)
+
+addToDefMap :: [[String]] -> M.Map String [String] -> M.Map String [String]
+addToDefMap items@(first:_) pathMap = M.insert key value pathMap 
+  where
+    (key:_) = first
+    value = reverse $ map getLoc items
+
+addDefDataToUse :: M.Map String [String] -> [String] -> String
+addDefDataToUse defMap usage = case defPath of
+    Just def -> L.intercalate ">" $ loc:def
+    Nothing -> []
   where 
-    (newCoveredPath, newTrace) = foldr (getCoveredPath path defMap) (coveredPath, trace) children
+    (key:_) = usage
+    loc = getLoc usage
+    defPath = M.lookup key defMap
 
-getCoveredPath path defMap node@(UseNode span uses []) (coveredPath, trace@(current:rest)) =
-  if current == ppWhere 
-    then 
-      --T.trace ("A2:" ++ (show path) ++ ppWhere ++ (show uses) ++ (show defNodes)) $ 
-      ((L.intercalate "->" (path ++ [ppWhere])):resultCoveredPath, resultTrace)
-    else (coveredPath, trace)
+getCoveredPath :: [String] -> [String]
+getCoveredPath trace = uniq $ map (addDefDataToUse defMap) usageData 
   where 
-    (resultCoveredPath, resultTrace) = if length newTrace + 1 == length trace 
-      then (newCoveredPath, newTrace)
-      else getCoveredPath path defMap node (newCoveredPath, current:newTrace)
-    (newCoveredPath, newTrace) = foldr (getCoveredPath [ppWhere] defMap) (coveredPath, rest) defNodes
-    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
-    defNodes = M.elems $ M.filterWithKey (\k -> \_ -> k `elem` uses) defMap    
-
-getCoveredPath path defMap node@(UseNode span uses children) (coveredPath, trace@(current:rest)) =
-  if current == ppWhere 
-    then 
-      --T.trace ("B1:" ++ (show path) ++ ppWhere ++ (show uses) ++ (show defNodes)) 
-      (resultCoveredPath, resultTrace)
-    else (coveredPath, trace)
-  where 
-    (resultCoveredPath, resultTrace) = if length newTrace + 1 == length trace 
-      then (newCoveredPath, newTrace)
-      else getCoveredPath path defMap node (newCoveredPath, current:newTrace)
-    (newCoveredPath, newTrace) = foldr (getCoveredPath (path ++ [ppWhere]) defMap) (useCoveredPath, useTrace) children
-    (useCoveredPath, useTrace) = foldr (getCoveredPath [ppWhere] defMap) (coveredPath, rest) defNodes
-    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
-    defNodes = M.elems $ M.filterWithKey (\k -> \_ -> k `elem` uses) defMap    
-
-getCoveredPath _ _ _ (coveredPath, []) = (coveredPath, [])
+    splitedData = map (splitString '#') trace
+    deinfintionData = L.filter isDef splitedData
+    usageData = L.filter (not . isDef) splitedData
+    groupedData = L.groupBy isSameValue splitedData
+    defMap = foldr addToDefMap M.empty groupedData

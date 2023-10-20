@@ -1,8 +1,6 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
-
-#define traceLoc trace (__FILE__ ++":"++ show __LINE__)
+{-# LANGUAGE MagicHash, BangPatterns #-}
 
 module DataFlow.Instrumentation ( plugin ) where
 
@@ -11,8 +9,6 @@ import Data.Traversable ( for )
 import Control.Monad.IO.Class ( liftIO )
 import Data.Foldable ( toList )
 
-import Control.DeepSeq
-  
 -- ghc
 import GHC.Data.Bag
 import GHC.Types.SrcLoc
@@ -51,9 +47,20 @@ import Data.Generics ( everywhereM, mkM )
 -- template-haskell
 import Language.Haskell.TH as TH
 
-trace :: String -> a -> a
-trace input body = unsafePerformIO $ do
- appendFile "run.out" (input ++ "\n")
+import GHC.Exts
+
+data Ptr' a = Ptr' a
+
+-- Any is a type to which any type can be safely unsafeCoerced to.
+aToWord# :: Any -> Word#
+aToWord# a = let !mb = Ptr' a in case unsafeCoerce# mb :: Word of W# addr -> addr
+
+unsafeAddr :: a -> Int
+unsafeAddr a = I# (word2Int# (aToWord# (unsafeCoerce# a)))
+
+trace :: String -> String -> a -> a
+trace flag input body = unsafePerformIO $ do
+ appendFile "run.out" $! ((show $ unsafeAddr $! body) ++ "#" ++ flag ++ "#" ++  input ++ "\n")
  return body
 
 plugin :: GHC.Plugin
@@ -74,22 +81,22 @@ pluginImpl ms tcGblEnv = do
 
 addExprTrace :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
 addExprTrace (GHC.L loc (GHC.HsIf p cond first second)) = do
-  new_first <- injectTrace "D:" first
-  new_second <- injectTrace "D:" second
+  new_first <- injectTrace "D" first
+  new_second <- injectTrace "D" second
   return (GHC.L loc (GHC.HsIf p cond new_first new_second))
 
-addExprTrace (GHC.L loc (GHC.HsApp p func arg@(GHC.L _ (GHC.HsVar _ _)))) = 
+addExprTrace var@(GHC.L _ (GHC.HsVar _ _)) = 
   --T.trace (GHC.renderWithContext GHC.defaultSDocContext( GHC.ppr loc )) $
   do
-  new_arg <- injectTrace "U:" arg
-  return (GHC.L loc (GHC.HsApp p func new_arg))
+  new_var <- injectTrace "U" var
+  return new_var
 
 addExprTrace other = 
   return other
 
 addMatchTrace :: GHC.LGRHS GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.LGRHS GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
 addMatchTrace (GHC.L loc (GHC.GRHS p g body)) = do
-  new_body <- injectTrace "D:" body
+  new_body <- injectTrace "D" body
   return (GHC.L loc (GHC.GRHS p g new_body))
 
 addMatchTrace other = 
@@ -97,7 +104,7 @@ addMatchTrace other =
 
 addBindTrace :: GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
 addBindTrace (GHC.BindStmt p g body) = do
-  new_body <- injectTrace "D:" body
+  new_body <- injectTrace "D" body
   return (GHC.BindStmt p g new_body)
 
 addBindTrace other = 
@@ -118,7 +125,7 @@ injectTrace flag expr@(GHC.L GHC.SrcSpanAnn{GHC.locA=(GHC.RealSrcSpan loc _)} _)
         fmap ( GHC.convertToHsExpr GHC.Generated GHC.noSrcSpan )
           $ liftIO
           $ TH.runQ
-          $ [| trace (flag ++ ppWhere) |]
+          $ [| trace flag ppWhere |]
 
   ( traceExprRn, _ ) <-
     GHC.rnLExpr traceExprPs
