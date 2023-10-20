@@ -11,7 +11,7 @@ import qualified DataFlow.HieASTGraphGenerator as AG
 import qualified GHC.Utils.Outputable as GHC
 
 import qualified Debug.Trace as T
-
+import           System.IO
 
 data GraphNode = DefNode String [GraphNode] | UseNode Span [String] [GraphNode]
   deriving (Show)
@@ -114,38 +114,14 @@ analyzeCoverage trace path =
     lParReplace = L.replace "(" "[(]" slashReplace
     slashReplace = L.replace "\\" "[\\]" path
 
-processTrace :: [String] -> [String] -> M.Map String GraphNode -> GraphNode -> [String]
-processTrace _ [] _ _ = []
-
-processTrace path trace defMap (DefNode _ children) = uniq  $ concat $ fmap (processTrace path trace defMap) children
-
-processTrace path (current:rest) defMap (UseNode span usedSymbols []) = case current of 
-    ppWhere -> [L.intercalate "->" nextPath]
-    _ -> []
-  where 
-    createPath use = case M.lookup use defMap of
-      Just node -> processTrace [] rest defMap node
-      _ -> []
-    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
-    nextPath = path ++ [current]
-
-processTrace path (current:rest) defMap (UseNode span usedSymbols children) = case current of 
-    ppWhere -> uniq $ concat $ (fmap (processTrace (path ++ [current]) rest defMap) children) ++ (fmap createPath usedSymbols)
-    _ -> []
-  where 
-    createPath use = case M.lookup use defMap of
-      Just node -> processTrace [] rest defMap node
-      _ -> []
-    ppWhere = GHC.renderWithContext GHC.defaultSDocContext ( GHC.ppr span )
-    nextPath = path ++ [current]
-
 analyze :: String -> String -> IO (String)
 analyze hieDir runFile = do
   files <- getFilesRecursive hieDir
   let 
     hieFiles = filter (L.isSuffixOf ".hie") files
   asts <- mapM (\f -> AG.loadAST f)  hieFiles
-  runData <- readFile runFile
+  handle <- openFile runFile ReadMode
+  runData <- hGetContents handle
   let 
     concatedAsts = concat asts
     graphNodes = fmap convertToGraphNodeInit concatedAsts
@@ -161,20 +137,25 @@ coverage hieDir runFile = do
   let 
     hieFiles = filter (L.isSuffixOf ".hie") files
   asts <- mapM (\f -> AG.loadAST f)  hieFiles
-  runData <- readFile runFile
+  handle <- openFile runFile ReadMode
+  runData <- hGetContents handle
   let 
     concatedAsts = concat asts
     graphNodes = fmap convertToGraphNodeInit concatedAsts
-    duPath = uniq $ createDefUsePath (DefNode "ALL" graphNodes)
-    trace = L.intercalate "->" (lines runData)
-    coverageData = fmap (analyzeCoverage trace) duPath
-    totalCount = length coverageData
-    coveredCount = length $ filter (== True) coverageData
-  return (totalCount, coveredCount)
+    node = DefNode "ALL" graphNodes
+    defMap = createDefMap node M.empty
+    trace = lines runData
+    result = uniq $ getCoveredPath trace
+    duPath = uniq $ createDefUsePath node
+  return $ (length duPath, length result)
 
 isDef :: [String] -> Bool
-isDef (_:"D:":_) = True
-isDef _ = False
+isDef (_:"D":_) = True
+isDef item = False
+
+isUse :: [String] -> Bool
+isUse (_:"U":_) = True
+isUse item =  False
 
 getLoc :: [String] -> String
 getLoc [_,_,loc] = loc
@@ -208,8 +189,8 @@ addDefDataToUse defMap usage = case defPath of
 getCoveredPath :: [String] -> [String]
 getCoveredPath trace = uniq $ map (addDefDataToUse defMap) usageData 
   where 
-    splitedData = map (splitString '#') trace
+    splitedData = map (splitString ',') trace
     deinfintionData = L.filter isDef splitedData
-    usageData = L.filter (not . isDef) splitedData
+    usageData = L.filter isUse splitedData
     groupedData = L.groupBy isSameValue splitedData
     defMap = foldr addToDefMap M.empty groupedData
