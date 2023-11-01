@@ -1,13 +1,13 @@
 module Decorators.PriceBand (pricebandCheck) where
 
 import           Domain.ME
-import           Infra.Coverage
+-- import           Infra.Coverage
 import           Infra.Decorator
 
 
 pricebandCheck :: Decorator
 pricebandCheck =
-    decorateOnAccept "PBC" pricebandCheckByType
+    decorateOnAccept  pricebandCheckByType
 
 
 pricebandCheckByType :: PartialDecorator
@@ -17,8 +17,7 @@ pricebandCheckByType rq@NewOrderRq {} s rs = do
 pricebandCheckByType rq@ReplaceOrderRq {} s rs = do
     pricebandCheckForArrivingOrder rq s rs
 
-pricebandCheckByType _ _ rs =
-    rs `covers` "PBC-P"
+pricebandCheckByType _ _ rs = rs
 
 
 pricebandCheckForArrivingOrder :: PartialDecorator
@@ -28,8 +27,8 @@ pricebandCheckForArrivingOrder rq s rs = do
     let minPriceBandPortion = staticPriceBandLowerLimit s
     let maxPriceBandPortion = staticPriceBandUpperLimit s
     if pricebandPreCheck minPriceBandPortion maxPriceBandPortion rp o
-        then rs `covers` "PBC1"
-        else reject rq s `covers` "PBC2"
+        then rs 
+        else reject rq s
 
 
 pricebandPreCheck :: Float -> Float -> Int -> Order -> Bool

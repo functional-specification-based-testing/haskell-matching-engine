@@ -1,9 +1,9 @@
 module Shahlaa
     ( addOracle
-    , coverage
+    -- , coverage
     , fTestCase
-    , fCoverage
-    , fCoverageInOrder
+    -- , fCoverage
+    -- , fCoverageInOrder
     ) where
 
 import           Control.Monad.Trans.State
@@ -14,56 +14,56 @@ import           Text.Printf
 import           Domain.ME
 import           Domain.MEService
 import           Printer
-import           Infra.Coverage
+-- import           Infra.Coverage
 
 
 data TestCase = TestCase
     { input    :: [Request]
     , output   :: [Response]
-    , coverage :: [CoverageInfo]
+    -- , coverage :: [CoverageInfo]
     } deriving (Eq, Show)
 
 
-type TestState = (MEState, [Response], [CoverageInfo])
+type TestState = (MEState, [Response])
 
 
 initTestState :: TestState
-initTestState = (initMEState, [], [])
+initTestState = (initMEState, [])
 
 
 handleRequest :: TestState -> Request -> TestState
-handleRequest (s, rss, covs) rq =
-    (s', rss ++ [rs], covs ++ [cov])
+handleRequest (s, rss) rq =
+    (s', rss ++ [rs])
   where
-    (rs, cov) = runState (requestHandler rq s) emptyCoverage
+    rs = requestHandler rq s
     s' = Domain.ME.state rs
 
 
 addOracle :: [Request] -> TestCase
 addOracle rqs =
-    TestCase rqs rss covs
+    TestCase rqs rss 
   where
-    (s, rss, covs) = foldl handleRequest initTestState rqs
+    (s, rss) = foldl handleRequest initTestState rqs
 
 
-coverageScoreTC :: TestCase -> Int
-coverageScoreTC = coverageScore . concat . coverage
+-- coverageScoreTC :: TestCase -> Int
+-- coverageScoreTC = coverageScore . concat . coverage
 
 
-avgCoverageScoreTS :: [TestCase] -> Double
-avgCoverageScoreTS ts = fromIntegral (sum $ map coverageScoreTC ts) / fromIntegral (length ts)
+-- avgCoverageScoreTS :: [TestCase] -> Double
+-- avgCoverageScoreTS ts = fromIntegral (sum $ map coverageScoreTC ts) / fromIntegral (length ts)
 
 
-coverageSetTC :: [CoverageInfo] -> Set.Set CoverageItem
-coverageSetTC = Set.fromList . concat
+-- coverageSetTC :: [CoverageInfo] -> Set.Set CoverageItem
+-- coverageSetTC = Set.fromList . concat
 
 
-fCoverage :: [CoverageInfo] -> String
-fCoverage cs = unwords $ Set.elems $ coverageSetTC cs
+-- fCoverage :: [CoverageInfo] -> String
+-- fCoverage cs = unwords $ Set.elems $ coverageSetTC cs
 
 
-fCoverageInOrder :: [CoverageInfo] -> String
-fCoverageInOrder cs = unwords $ concat cs
+-- fCoverageInOrder :: [CoverageInfo] -> String
+-- fCoverageInOrder cs = unwords $ concat cs
 
 
 fInput :: [Request] -> String
@@ -75,7 +75,7 @@ fOutput = concatMap fResponse
 
 
 fTestCase :: TestCase -> String
-fTestCase (TestCase inp out _) = fInput inp ++ fOutput out ++ "\n"
+fTestCase (TestCase inp out ) = fInput inp ++ fOutput out ++ "\n"
 
 
 fTestSuite :: [TestCase] -> String

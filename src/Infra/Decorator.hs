@@ -6,17 +6,18 @@ module Infra.Decorator
     ) where
 
 import           Domain.ME
-import           Infra.Coverage
+-- import           Infra.Coverage
 
-type Handler = Request -> MEState -> Coverage Response
+type Handler = Request -> MEState ->  Response
 type Decorator = Handler -> Handler
-type PartialDecorator = Request -> MEState -> Response -> Coverage Response
+-- type Decorator = Request -> MEState ->  Response -> Request -> MEState ->  Response
+type PartialDecorator = Request -> MEState -> Response ->  Response
 
 
-decorateOnAccept :: String -> PartialDecorator -> Decorator
-decorateOnAccept stmtPrefix decorateByType handler rq s = do
-    rs <- handler rq s
+decorateOnAccept :: PartialDecorator -> Handler -> Request -> MEState ->  Response
+decorateOnAccept decorateByType handler rq s = do
+    let rs = handler rq s
     case status rs of
         Accepted   -> decorateByType rq s rs
-        Eliminated -> rs `covers`  (stmtPrefix ++ "-AE")
-        Rejected   -> rs `covers`  (stmtPrefix ++ "-AR")
+        Eliminated -> rs
+        Rejected   -> rs 

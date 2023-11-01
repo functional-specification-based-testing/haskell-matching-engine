@@ -10,16 +10,16 @@ import           Decorators.Ownership
 import           Decorators.PriceBand
 import           Decorators.Validation
 import           Domain.ME
-import           Infra.Coverage
+-- import           Infra.Coverage
 import           Infra.Decorator
 
 
 handlerSeed :: Handler
-handlerSeed NewOrderRq {} s = NewOrderRs Accepted [] s `covers` "NO-RCV"
+handlerSeed NewOrderRq {} s = NewOrderRs Accepted [] s
 
-handlerSeed ReplaceOrderRq {} s = ReplaceOrderRs Accepted Nothing [] s `covers` "RO-RCV"
+handlerSeed ReplaceOrderRq {} s = ReplaceOrderRs Accepted Nothing [] s
 
-handlerSeed CancelOrderRq {} s = CancelOrderRs Accepted Nothing s `covers` "CO-RCV"
+handlerSeed CancelOrderRq {} s = CancelOrderRs Accepted Nothing s 
 
 
 newOrderHandler :: Handler
@@ -66,28 +66,28 @@ requestHandler rq@ReplaceOrderRq {} s =
     replaceOrderHandler rq s
 
 requestHandler (SetCreditRq b c) s = do
-    return (SetCreditRs Accepted s { creditInfo = insert b c (creditInfo s) })
+    (SetCreditRs Accepted s { creditInfo = insert b c (creditInfo s) })
 
 requestHandler (SetOwnershipRq sh i) s = do
-    return (SetOwnershipRs Accepted s { ownershipInfo = insert sh i (ownershipInfo s) })
+    (SetOwnershipRs Accepted s { ownershipInfo = insert sh i (ownershipInfo s) })
 
 requestHandler (SetReferencePriceRq rp) s = do
-    return (SetReferencePriceRs Accepted s { referencePrice = rp })
+    (SetReferencePriceRs Accepted s { referencePrice = rp })
 
 requestHandler (SetTotalSharesRq ts) s = do
-    return (SetTotalSharesRs Accepted s { totalShares = ts })
+    (SetTotalSharesRs Accepted s { totalShares = ts })
 
 requestHandler (SetStaticPriceBandLowerLimitRq pb) s = do
-    return (SetStaticPriceBandLowerLimitRs Accepted s { staticPriceBandLowerLimit = pb })
+    (SetStaticPriceBandLowerLimitRs Accepted s { staticPriceBandLowerLimit = pb })
 
 requestHandler (SetStaticPriceBandUpperLimitRq pb) s = do
-    return (SetStaticPriceBandUpperLimitRs Accepted s { staticPriceBandUpperLimit = pb })
+    (SetStaticPriceBandUpperLimitRs Accepted s { staticPriceBandUpperLimit = pb })
 
 requestHandler (SetOwnershipUpperLimitRq ol) s = do
-    return (SetOwnershipUpperLimitRs Accepted s { ownershipUpperLimit = ol })
+    (SetOwnershipUpperLimitRs Accepted s { ownershipUpperLimit = ol })
 
 requestHandler (SetTickSizeRq t) s = do
-    return (SetTickSizeRs Accepted s { tickSize = t })
+    (SetTickSizeRs Accepted s { tickSize = t })
 
 requestHandler (SetLotSizeRq l) s = do
-    return (SetLotSizeRs Accepted s { lotSize = l })
+    (SetLotSizeRs Accepted s { lotSize = l })

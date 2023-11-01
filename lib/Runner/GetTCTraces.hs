@@ -25,11 +25,11 @@ main = do
     let requests = [genRequest rqid $ words rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
     let tc = addOracle requests
 
-    if func == "--trades"
-        then putStrLn $ fTestCase tc
+    -- if func == "--trades"
+    --     then putStrLn $ fTestCase tc
         -- else putStrLn $ fCoverage $ coverage tc
-        else putStrLn $ fCoverageInOrder $ coverage tc
-    
+        -- else putStrLn $ fCoverageInOrder $ coverage tc
+    putStrLn $ fTestCase tc
     hClose handle
 
     endTime <- getCurrentTime

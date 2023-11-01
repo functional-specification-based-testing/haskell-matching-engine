@@ -3,13 +3,13 @@ module Decorators.Ownership (ownershipCheck) where
 import           Data.Map
 
 import           Domain.ME
-import           Infra.Coverage
+-- import           Infra.Coverage
 import           Infra.Decorator
 
 
 ownershipCheck :: Decorator
 ownershipCheck =
-    decorateOnAccept "OSC" $ ownershipCheckByType
+    decorateOnAccept  $ ownershipCheckByType
 
 
 ownershipCheckByType :: PartialDecorator
@@ -19,8 +19,7 @@ ownershipCheckByType rq@NewOrderRq {} s rs =
 ownershipCheckByType rq@ReplaceOrderRq {} s rs =
     ownershipCheckForArrivingOrder rq s rs
 
-ownershipCheckByType _ _ rs =
-    rs `covers` "OSC-P"
+ownershipCheckByType _ _ rs = rs 
 
 
 getOldOrder :: Response -> Maybe Order
@@ -41,8 +40,8 @@ ownershipCheckForArrivingOrder rq s rs = do
     let s' = state rs
     let maxOwnershipPortion = ownershipUpperLimit s
     if ownershipPreCheck maxOwnershipPortion o oldo s
-        then rs { state = updateOwnershipInfo (trades rs) s' } `covers` "OSC1"
-        else reject rq s `covers` "OSC2"
+        then rs { state = updateOwnershipInfo (trades rs) s' } 
+        else reject rq s 
 
 
 updateOwnershipInfo :: [Trade] -> MEState -> MEState

@@ -4,35 +4,33 @@ module Decorators.Validation
     ) where
 
 import           Domain.ME
-import           Infra.Coverage
+-- import           Infra.Coverage
 import           Infra.Decorator
 
 
 validateOrder :: Decorator
 validateOrder hdlr =
-    decorateOnAccept "VAL-PR" validatePriceWrapper $
-    decorateOnAccept "VAL-QTY" validateQtyWrapper $
-    decorateOnAccept "VAL-AttrConsistency" validateAttrConsistencyWrapper $
-    decorateOnAccept "VAL-Replace" validateOnReplaceWrapper $
+    decorateOnAccept validatePriceWrapper $
+    decorateOnAccept validateQtyWrapper $
+    decorateOnAccept validateAttrConsistencyWrapper $
+    decorateOnAccept validateOnReplaceWrapper $
     hdlr
 
 
 validatePriceWrapper :: PartialDecorator
-validatePriceWrapper rq@NewOrderRq{} s rs =
-    validatePrice rq s rs
+validatePriceWrapper rq@NewOrderRq{} s rs = validatePrice rq s rs
 
 validatePriceWrapper rq@ReplaceOrderRq{} s rs =
     validatePrice rq s rs
 
-validatePriceWrapper _ _ rs =
-    rs `covers` "VAL-PR-P"
+validatePriceWrapper _ _ rs = rs
 
 
 validatePrice :: PartialDecorator
 validatePrice rq s rs
-    | p <= 0 = reject rq s `covers` "VAL-PR-non-posetive-price"
-    | p `rem` tick /= 0 = reject rq s `covers` "VAL-PR-tick-violation"
-    | otherwise = rs `covers` "VAL-PR-passed"
+    | p <= 0 = reject rq s 
+    | p `rem` tick /= 0 = reject rq s 
+    | otherwise = rs
   where
     o = order rq
     p = price o
@@ -46,17 +44,16 @@ validateQtyWrapper rq@NewOrderRq{} s rs =
 validateQtyWrapper rq@ReplaceOrderRq{} s rs =
     validateQty rq s rs
 
-validateQtyWrapper _ _ rs =
-    rs `covers` "VAL-QTY-P"
+validateQtyWrapper _ _ rs = rs
 
 
 validateQty :: PartialDecorator
 validateQty rq s rs
-    | q <= 0 = reject rq s `covers` "VAL-QTY-non-posetive-qty"
-    | q `rem` lot /= 0 = reject rq s `covers` "VAL-QTY-lot-violation"
-    | not $ validateIcebergQty o = reject rq s `covers` "VAL-QTY-lot-invalid-disclosed-qty"
-    | not $ validateMinQty o = reject rq s `covers` "VAL-QTY-lot-invalid-min-qty"
-    | otherwise = rs `covers` "VAL-QTY-passed"
+    | q <= 0 = reject rq s 
+    | q `rem` lot /= 0 = reject rq s 
+    | not $ validateIcebergQty o = reject rq s 
+    | not $ validateMinQty o = reject rq s 
+    | otherwise = rs
   where
     o = order rq
     q = quantity o
@@ -92,14 +89,14 @@ validateAttrConsistencyWrapper rq@ReplaceOrderRq{} s rs =
     validateAttrConsistency rq s rs
 
 validateAttrConsistencyWrapper _ _ rs =
-    rs `covers` "VAL-AttrConsistency-P"
+    rs
 
 
 validateAttrConsistency :: PartialDecorator
 validateAttrConsistency rq s rs
-    | not $ validateFakWithIceberg o = reject rq s `covers` "VAL-AttrConsistency-iceberg-fak"
-    | not $ validateFakWithMinQty o = reject rq s `covers` "VAL-AttrConsistency-iceberg-min-qty"
-    | otherwise = rs `covers` "VAL-AttrConsistency-passed"
+    | not $ validateFakWithIceberg o = reject rq s
+    | not $ validateFakWithMinQty o = reject rq s 
+    | otherwise = rs 
   where
     o = order rq
 
@@ -129,13 +126,13 @@ validateOnReplaceWrapper rq@ReplaceOrderRq{} s rs =
     validateOnReplace rq s rs
 
 validateOnReplaceWrapper _ _ rs =
-    rs `covers` "VAL-Replace-P"
+    rs 
 
 
 validateOnReplace :: PartialDecorator
 validateOnReplace rq s rs
-    | not $ allowMinQty o = reject rq s `covers` "VAL-Replace-with-min-qty"
-    | otherwise = rs `covers` "VAL-Replace-passed"
+    | not $ allowMinQty o = reject rq s 
+    | otherwise = rs
   where
     o = order rq
 

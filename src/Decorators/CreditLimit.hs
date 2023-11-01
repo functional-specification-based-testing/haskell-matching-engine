@@ -3,7 +3,7 @@ module Decorators.CreditLimit (creditLimitProc) where
 import qualified Data.Map        as Map
 
 import           Domain.ME
-import           Infra.Coverage
+-- import           Infra.Coverage
 import           Infra.Decorator
 
 
@@ -66,7 +66,7 @@ updateSellerCreditByTrade state t =
 
 creditLimitProc :: Decorator
 creditLimitProc =
-    decorateOnAccept "CLP" creditLimitProcByType
+    decorateOnAccept creditLimitProcByType
 
 
 creditLimitProcByType :: PartialDecorator
@@ -76,8 +76,7 @@ creditLimitProcByType rq@NewOrderRq {} s rs =
 creditLimitProcByType rq@ReplaceOrderRq {} s rs =
     creditLimitProcForArrivingOrder rq s rs
 
-creditLimitProcByType _ _ rs =
-    rs `covers` "CLP-P"
+creditLimitProcByType _ _ rs =rs
 
 
 creditLimitProcForArrivingOrder :: PartialDecorator
@@ -85,5 +84,5 @@ creditLimitProcForArrivingOrder rq s rs = do
     let o = order rq
     let s' = state rs
     if creditLimitCheckForArrivingOrder o s (trades rs) s'
-        then rs { state = updateCreditInfo (trades rs) s'} `covers` "CLP1"
-        else reject rq s `covers` "CLP2"
+        then rs { state = updateCreditInfo (trades rs) s'} 
+        else reject rq s 
