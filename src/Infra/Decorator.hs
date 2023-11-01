@@ -15,8 +15,8 @@ type PartialDecorator = Request -> MEState -> Response ->  Response
 
 
 decorateOnAccept :: PartialDecorator -> Handler -> Request -> MEState ->  Response
-decorateOnAccept decorateByType handler rq s = do
-    let rs = handler rq s
+decorateOnAccept !decorateByType !handler !rq !s = do
+    let !rs = handler rq s
     case status rs of
         Accepted   -> decorateByType rq s rs
         Eliminated -> rs

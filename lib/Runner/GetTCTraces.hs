@@ -21,9 +21,9 @@ main = do
 
     handle <- openFile addr ReadMode
     contents <- hGetContents handle
-    let rawRequests = lines contents
-    let requests = [genRequest rqid $ words rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
-    let tc = addOracle requests
+    let !rawRequests = lines contents
+    let !requests = [genRequest rqid $ words rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
+    let !tc = addOracle requests
 
     -- if func == "--trades"
     --     then putStrLn $ fTestCase tc

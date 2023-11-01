@@ -10,119 +10,119 @@ import           Infra.Decorator
 
 validateOrder :: Decorator
 validateOrder hdlr =
-    decorateOnAccept validatePriceWrapper $
-    decorateOnAccept validateQtyWrapper $
-    decorateOnAccept validateAttrConsistencyWrapper $
-    decorateOnAccept validateOnReplaceWrapper $
+    decorateOnAccept validatePriceWrapper $!
+    decorateOnAccept validateQtyWrapper $!
+    decorateOnAccept validateAttrConsistencyWrapper $!
+    decorateOnAccept validateOnReplaceWrapper $!
     hdlr
 
 
 validatePriceWrapper :: PartialDecorator
-validatePriceWrapper rq@NewOrderRq{} s rs = validatePrice rq s rs
+validatePriceWrapper !rq@NewOrderRq{} !s !rs = validatePrice rq s rs
 
-validatePriceWrapper rq@ReplaceOrderRq{} s rs =
+validatePriceWrapper !rq@ReplaceOrderRq{} !s !rs =
     validatePrice rq s rs
 
-validatePriceWrapper _ _ rs = rs
+validatePriceWrapper _ _ !rs = rs
 
 
 validatePrice :: PartialDecorator
-validatePrice rq s rs
+validatePrice !rq !s !rs
     | p <= 0 = reject rq s 
     | p `rem` tick /= 0 = reject rq s 
     | otherwise = rs
   where
-    o = order rq
-    p = price o
-    tick = tickSize s
+    !o = order rq
+    !p = price o
+    !tick = tickSize s
 
 
 validateQtyWrapper :: PartialDecorator
-validateQtyWrapper rq@NewOrderRq{} s rs =
+validateQtyWrapper !rq@NewOrderRq{} !s !rs =
     validateQty rq s rs
 
-validateQtyWrapper rq@ReplaceOrderRq{} s rs =
+validateQtyWrapper !rq@ReplaceOrderRq{} !s !rs =
     validateQty rq s rs
 
-validateQtyWrapper _ _ rs = rs
+validateQtyWrapper _ _ !rs = rs
 
 
 validateQty :: PartialDecorator
-validateQty rq s rs
+validateQty !rq !s !rs
     | q <= 0 = reject rq s 
     | q `rem` lot /= 0 = reject rq s 
-    | not $ validateIcebergQty o = reject rq s 
-    | not $ validateMinQty o = reject rq s 
+    | not $! validateIcebergQty o = reject rq s 
+    | not $! validateMinQty o = reject rq s 
     | otherwise = rs
   where
-    o = order rq
-    q = quantity o
-    lot = lotSize s
+    !o = order rq
+    !q = quantity o
+    !lot = lotSize s
 
 
 validateIcebergQty :: Order -> Bool
 validateIcebergQty LimitOrder {} =
     True
 
-validateIcebergQty order@IcebergOrder {} =
+validateIcebergQty !order@IcebergOrder {} =
     d > 0 && d <= q
   where
-    q = quantity order
-    d = disclosedQty order
+    !q = quantity order
+    !d = disclosedQty order
 
 
 validateMinQty :: Order -> Bool
-validateMinQty order =
+validateMinQty !order =
     case m of
         Nothing -> True
         Just mq -> mq > 0 && mq <= q
   where
-    m = minQty order
-    q = quantity order
+    !m = minQty order
+    !q = quantity order
 
 
 validateAttrConsistencyWrapper :: PartialDecorator
-validateAttrConsistencyWrapper rq@NewOrderRq{} s rs =
+validateAttrConsistencyWrapper !rq@NewOrderRq{} !s !rs =
     validateAttrConsistency rq s rs
 
-validateAttrConsistencyWrapper rq@ReplaceOrderRq{} s rs =
+validateAttrConsistencyWrapper !rq@ReplaceOrderRq{} !s !rs =
     validateAttrConsistency rq s rs
 
-validateAttrConsistencyWrapper _ _ rs =
+validateAttrConsistencyWrapper _ _ !rs =
     rs
 
 
 validateAttrConsistency :: PartialDecorator
-validateAttrConsistency rq s rs
-    | not $ validateFakWithIceberg o = reject rq s
-    | not $ validateFakWithMinQty o = reject rq s 
+validateAttrConsistency !rq !s !rs
+    | not $! validateFakWithIceberg o = reject rq s
+    | not $! validateFakWithMinQty o = reject rq s 
     | otherwise = rs 
   where
-    o = order rq
+    !o = order rq
 
 
 validateFakWithIceberg :: Order -> Bool
 validateFakWithIceberg LimitOrder {} =
     True
 
-validateFakWithIceberg order@IcebergOrder {} =
+validateFakWithIceberg !order@IcebergOrder {} =
     not fak
   where
-    fak = fillAndKill order
+    !fak = fillAndKill order
 
 
 validateFakWithMinQty :: Order -> Bool
-validateFakWithMinQty order =
+validateFakWithMinQty !order =
     case m of
         Nothing -> True
         Just _  -> not fak
   where
-    fak = fillAndKill order
-    m = minQty order
+    !fak = fillAndKill order
+    !m = minQty order
 
 
 validateOnReplaceWrapper :: PartialDecorator
-validateOnReplaceWrapper rq@ReplaceOrderRq{} s rs =
+validateOnReplaceWrapper !rq@ReplaceOrderRq{} !s !rs =
     validateOnReplace rq s rs
 
 validateOnReplaceWrapper _ _ rs =
@@ -130,31 +130,31 @@ validateOnReplaceWrapper _ _ rs =
 
 
 validateOnReplace :: PartialDecorator
-validateOnReplace rq s rs
-    | not $ allowMinQty o = reject rq s 
+validateOnReplace !rq !s !rs
+    | not $! allowMinQty o = reject rq s 
     | otherwise = rs
   where
-    o = order rq
+    !o = order rq
 
 
 allowMinQty :: Order -> Bool
-allowMinQty order =
+allowMinQty !order =
     case m of
         Nothing -> True
         Just _  -> False
   where
-    m = minQty order
+    !m = minQty order
 
 
 postponedCheckOnReplace :: Order -> Order -> Bool
-postponedCheckOnReplace oldOrder newOrderNotAdjusted =
+postponedCheckOnReplace !oldOrder !newOrderNotAdjusted =
     newShareholder == oldShareholder &&
     newBroker == oldBroker &&
     newSide == oldSide
   where
-    newShareholder = shid newOrderNotAdjusted
-    oldShareholder = shid oldOrder
-    newBroker = brid newOrderNotAdjusted
-    oldBroker = brid oldOrder
-    newSide = side newOrderNotAdjusted
-    oldSide = side oldOrder
+    !newShareholder = shid newOrderNotAdjusted
+    !oldShareholder = shid oldOrder
+    !newBroker = brid newOrderNotAdjusted
+    !oldBroker = brid oldOrder
+    !newSide = side newOrderNotAdjusted
+    !oldSide = side oldOrder

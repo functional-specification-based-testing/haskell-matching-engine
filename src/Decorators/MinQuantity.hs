@@ -11,10 +11,10 @@ minQuantityCheck =
 
 
 minQuantityCheckByType :: PartialDecorator
-minQuantityCheckByType rq@(NewOrderRq o) s rs =
+minQuantityCheckByType !rq@(NewOrderRq o) !s !rs =
     case minQty o of
         Nothing -> rs 
-        Just mq -> if sum (Prelude.map quantityTraded $ trades rs) >= mq
+        Just mq -> if sum (Prelude.map quantityTraded $! trades rs) >= mq
             then rs 
             else (reject rq s) { status = Eliminated } 
 

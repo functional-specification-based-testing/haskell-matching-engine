@@ -24,70 +24,70 @@ handlerSeed CancelOrderRq {} s = CancelOrderRs Accepted Nothing s
 
 newOrderHandler :: Handler
 newOrderHandler =
-    creditLimitProc $
-    fillAndKillProc $
-    minQuantityCheck $
-    pricebandCheck $
-    ownershipCheck $
-    orderHandlerDecorator $
+    creditLimitProc $!
+    fillAndKillProc $!
+    minQuantityCheck $!
+    pricebandCheck $!
+    ownershipCheck $!
+    orderHandlerDecorator $!
     validateOrder
     handlerSeed
 
 
 cancelOrderHandler :: Handler
 cancelOrderHandler =
-    creditLimitProc $
-    pricebandCheck $
-    ownershipCheck $
-    orderHandlerDecorator $
+    creditLimitProc $!
+    pricebandCheck $!
+    ownershipCheck $!
+    orderHandlerDecorator $!
     validateOrder
     handlerSeed
 
 
 replaceOrderHandler :: Handler
 replaceOrderHandler =
-    creditLimitProc $
-    fillAndKillProc $
-    pricebandCheck $
-    ownershipCheck $
-    orderHandlerDecorator $
+    creditLimitProc $!
+    fillAndKillProc $!
+    pricebandCheck $!
+    ownershipCheck $!
+    orderHandlerDecorator $!
     validateOrder
     handlerSeed
 
 
 requestHandler :: Handler
-requestHandler rq@NewOrderRq {} s =
+requestHandler !rq@NewOrderRq {} s =
     newOrderHandler rq s
 
-requestHandler rq@CancelOrderRq {} s =
+requestHandler !rq@CancelOrderRq {} s =
     cancelOrderHandler rq s
 
-requestHandler rq@ReplaceOrderRq {} s =
+requestHandler !rq@ReplaceOrderRq {} s =
     replaceOrderHandler rq s
 
-requestHandler (SetCreditRq b c) s = do
+requestHandler !(SetCreditRq b c) s = do
     (SetCreditRs Accepted s { creditInfo = insert b c (creditInfo s) })
 
-requestHandler (SetOwnershipRq sh i) s = do
+requestHandler !(SetOwnershipRq sh i) s = do
     (SetOwnershipRs Accepted s { ownershipInfo = insert sh i (ownershipInfo s) })
 
-requestHandler (SetReferencePriceRq rp) s = do
+requestHandler !(SetReferencePriceRq rp) s = do
     (SetReferencePriceRs Accepted s { referencePrice = rp })
 
-requestHandler (SetTotalSharesRq ts) s = do
+requestHandler !(SetTotalSharesRq ts) s = do
     (SetTotalSharesRs Accepted s { totalShares = ts })
 
-requestHandler (SetStaticPriceBandLowerLimitRq pb) s = do
+requestHandler !(SetStaticPriceBandLowerLimitRq pb) s = do
     (SetStaticPriceBandLowerLimitRs Accepted s { staticPriceBandLowerLimit = pb })
 
-requestHandler (SetStaticPriceBandUpperLimitRq pb) s = do
+requestHandler !(SetStaticPriceBandUpperLimitRq pb) s = do
     (SetStaticPriceBandUpperLimitRs Accepted s { staticPriceBandUpperLimit = pb })
 
-requestHandler (SetOwnershipUpperLimitRq ol) s = do
+requestHandler !(SetOwnershipUpperLimitRq ol) s = do
     (SetOwnershipUpperLimitRs Accepted s { ownershipUpperLimit = ol })
 
-requestHandler (SetTickSizeRq t) s = do
+requestHandler !(SetTickSizeRq t) s = do
     (SetTickSizeRs Accepted s { tickSize = t })
 
-requestHandler (SetLotSizeRq l) s = do
+requestHandler !(SetLotSizeRq l) s = do
     (SetLotSizeRs Accepted s { lotSize = l })
