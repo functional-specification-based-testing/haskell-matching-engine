@@ -3,17 +3,18 @@ module Decorators.Validation
     , postponedCheckOnReplace
     ) where
 
-import           Domain.ME
+import          Domain.ME
 -- import           Infra.Coverage
-import           Infra.Decorator
+import          Infra.Decorator
+import          Control.DeepSeq
 
 
 validateOrder :: Decorator
 validateOrder hdlr =
-    decorateOnAccept validatePriceWrapper $!
-    decorateOnAccept validateQtyWrapper $!
-    decorateOnAccept validateAttrConsistencyWrapper $!
-    decorateOnAccept validateOnReplaceWrapper $!
+    decorateOnAccept validatePriceWrapper `deepseq`
+    decorateOnAccept validateQtyWrapper `deepseq`
+    decorateOnAccept validateAttrConsistencyWrapper `deepseq`
+    decorateOnAccept validateOnReplaceWrapper `deepseq`
     hdlr
 
 
@@ -51,8 +52,8 @@ validateQty :: PartialDecorator
 validateQty !rq !s !rs
     | q <= 0 = reject rq s 
     | q `rem` lot /= 0 = reject rq s 
-    | not $! validateIcebergQty o = reject rq s 
-    | not $! validateMinQty o = reject rq s 
+    | not `deepseq` validateIcebergQty o = reject rq s 
+    | not `deepseq` validateMinQty o = reject rq s 
     | otherwise = rs
   where
     !o = order rq
@@ -61,7 +62,7 @@ validateQty !rq !s !rs
 
 
 validateIcebergQty :: Order -> Bool
-validateIcebergQty LimitOrder {} =
+validateIcebergQty !LimitOrder {} =
     True
 
 validateIcebergQty !order@IcebergOrder {} =
@@ -94,15 +95,15 @@ validateAttrConsistencyWrapper _ _ !rs =
 
 validateAttrConsistency :: PartialDecorator
 validateAttrConsistency !rq !s !rs
-    | not $! validateFakWithIceberg o = reject rq s
-    | not $! validateFakWithMinQty o = reject rq s 
+    | not `deepseq` validateFakWithIceberg o = reject rq s
+    | not `deepseq` validateFakWithMinQty o = reject rq s 
     | otherwise = rs 
   where
     !o = order rq
 
 
 validateFakWithIceberg :: Order -> Bool
-validateFakWithIceberg LimitOrder {} =
+validateFakWithIceberg !LimitOrder {} =
     True
 
 validateFakWithIceberg !order@IcebergOrder {} =
@@ -125,13 +126,13 @@ validateOnReplaceWrapper :: PartialDecorator
 validateOnReplaceWrapper !rq@ReplaceOrderRq{} !s !rs =
     validateOnReplace rq s rs
 
-validateOnReplaceWrapper _ _ rs =
+validateOnReplaceWrapper _ _ !rs =
     rs 
 
 
 validateOnReplace :: PartialDecorator
 validateOnReplace !rq !s !rs
-    | not $! allowMinQty o = reject rq s 
+    | not `deepseq` allowMinQty o = reject rq s 
     | otherwise = rs
   where
     !o = order rq

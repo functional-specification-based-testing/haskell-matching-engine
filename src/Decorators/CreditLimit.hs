@@ -5,6 +5,7 @@ import qualified Data.Map        as Map
 import           Domain.ME
 -- import           Infra.Coverage
 import           Infra.Decorator
+-- import           Control.DeepSeq
 
 
 creditSpentByBuyer :: BrokerID -> [Trade] -> Int

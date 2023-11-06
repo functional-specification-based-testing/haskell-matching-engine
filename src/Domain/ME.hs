@@ -39,6 +39,7 @@ module Domain.ME
 import           Control.Exception (assert)
 import qualified Data.List         as List
 import qualified Data.Map          as Map
+import           Control.DeepSeq
 
 
 type Quantity = Int
@@ -188,6 +189,9 @@ data Response = NewOrderRs
     { status :: ResponseStatus
     , state  :: MEState
     } deriving (Show, Eq)
+
+instance NFData Response where
+    rnf response = response `seq` ()
 
 
 reject :: Request -> MEState -> Response

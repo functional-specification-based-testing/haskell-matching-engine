@@ -38,6 +38,7 @@ import qualified GHC.Tc.Solver.Monad as SM
 import qualified GHC.Tc.Solver as GHC
 import qualified GHC.Tc.Gen.Expr as GHC
 import qualified GHC.Parser.Annotation as GHC
+import qualified GHC.Hs.Utils as GHC
 
 import qualified GHC.Core.Utils as CoreUtils
 
@@ -102,6 +103,7 @@ addMatchTrace (GHC.L loc (GHC.GRHS p g body)) = do
 
 addMatchTrace other = 
   return other
+
 
 addBindTrace :: GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.StmtLR GHC.GhcTc GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
 addBindTrace (GHC.BindStmt p g body) = do
