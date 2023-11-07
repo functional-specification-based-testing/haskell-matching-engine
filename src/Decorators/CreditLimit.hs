@@ -41,7 +41,7 @@ creditLimitCheckForArrivingOrder o beforeTradeState ts afterTradeState
 
 updateCreditInfo :: [Trade] -> MEState -> Coverage MEState
 updateCreditInfo ts s =
-    foldl updateCreditByTrade s ts `covers` "DF-D-credit"
+    foldl updateCreditByTrade s ts `covers` "DF-U-credit DF-D-credit"
 
 
 updateCreditByTrade :: MEState -> Trade -> MEState
