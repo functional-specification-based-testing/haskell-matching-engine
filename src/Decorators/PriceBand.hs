@@ -28,8 +28,8 @@ pricebandCheckForArrivingOrder rq s rs = do
     let minPriceBandPortion = staticPriceBandLowerLimit s
     let maxPriceBandPortion = staticPriceBandUpperLimit s
     if pricebandPreCheck minPriceBandPortion maxPriceBandPortion rp o
-        then rs `covers` "PBC1"
-        else reject rq s `covers` "PBC2"
+        then rs `covers` "PBC1 DF-U-price_band"
+        else reject rq s `covers` "PBC2 DF-U-price_band"
 
 
 pricebandPreCheck :: Float -> Float -> Int -> Order -> Bool

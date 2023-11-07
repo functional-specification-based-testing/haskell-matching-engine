@@ -39,7 +39,7 @@ orderReplacer rq@(ReplaceOrderRq oldoid oNotAdjusted) s = do
 
 
 substituteOrder :: OrderID -> Order -> OrderBook -> Coverage (OrderBook, [Trade])
-substituteOrder ooid o ob = (replaceOrderInPlace ooid o ob) `covers` "ROIP-1"
+substituteOrder ooid o ob = (replaceOrderInPlace ooid o ob) `covers` "ROIP-1 DF-U-ob"
 
 
 orderHandlerDecorator :: Decorator
@@ -69,18 +69,18 @@ canBeMatchedWithOppositeQueueHead o h
 
 
 match :: Order -> OrderQueue -> Coverage (Maybe Order, OrderQueue, [Trade])
-match o [] = (Just o, [], []) `covers` "M-0"
+match o [] = (Just o, [], []) `covers` "M-0 DF-U-ob"
 
 match o oq@(h:os)
-    | not $ canBeMatchedWithOppositeQueueHead o h = (Just o, oq, []) `covers` "M-1"
-    | newq < headq = (Nothing, (decQty h newq):os, [trade headp newq o h]) `covers` "M-2"
+    | not $ canBeMatchedWithOppositeQueueHead o h = (Just o, oq, []) `covers` "M-1 DF-U-ob"
+    | newq < headq = (Nothing, (decQty h newq):os, [trade headp newq o h]) `covers` "M-2 DF-U-ob"
     | newq == headq = do
         newQueue <- enqueueRemainder os $ decQty h newq
-        (Nothing, newQueue, [trade headp newq o h]) `covers` "M-3"
+        (Nothing, newQueue, [trade headp newq o h]) `covers` "M-3 DF-U-ob DF-D-ob"
     | newq > headq = do
-        newQueue <- enqueueRemainder os $ decQty h headq
+        newQueue <- (enqueueRemainder os $ decQty h headq) 
         (o', oq', ts') <- match (decQty o headq) newQueue
-        (o', oq', (trade headp headq o h):ts') `covers` "M-4"
+        (o', oq', (trade headp headq o h):ts') `covers` "M-4 DF-U-ob DF-D-ob"
   where
     newq = quantity o
     headp = price h
@@ -91,18 +91,18 @@ matchNewOrder :: Order -> OrderBook -> Coverage (OrderBook, [Trade])
 matchNewOrder o ob = do
     let oq = oppositeSideQueue o ob
     (remo, oq', ts) <- match o oq
-    let ob' = updateOppositeQueueInBook o oq' ob
-    let ob'' = enqueue remo ob'
+    ob' <- updateOppositeQueueInBook o oq' ob `covers` "DF-D-ob"
+    ob'' <- enqueue remo ob' `covers` "DF-D-ob"
     (ob'', ts) `covers` "MNO"
 
 
 cancelOrder :: OrderID -> Side -> OrderBook -> Coverage (OrderBook, Maybe Order)
 cancelOrder oid side ob = do
     case findOrderFromOrderBookByID oid side ob of
-        Just o -> (ob', Just o) `covers` "CO-1"
+        Just o -> (ob', Just o) `covers` "CO-1 DF-U-ob DF-D-ob"
           where
             ob' = removeOrderFromOrderBook o ob
-        Nothing -> (ob, Nothing) `covers` "CO-2"
+        Nothing -> (ob, Nothing) `covers` "CO-2 DF-U-ob"
 
 
 shouldSubstituteOrder :: Order -> Order -> Bool
@@ -130,14 +130,14 @@ adjustPeakSizeOnReplace oldOrder@IcebergOrder {} notAdjustedNewOrder@IcebergOrde
 enqueueRemainder :: OrderQueue -> Order -> Coverage OrderQueue
 enqueueRemainder os o@LimitOrder {}
     | q == 0 = os `covers` "ELR-1"
-    | otherwise = enqueueOrder o os `covers` "ELR-2"
+    | otherwise = enqueueOrder o os `covers` "ELR-2 DF-D-ob"
   where
     q = quantity o
 
 enqueueRemainder os o@IcebergOrder {}
     | q == 0 = os `covers` "EIR-1"
-    | vq == 0 && q <= dq = enqueueOrder (setVisibleQty o q) os `covers` "EIR-2"
-    | vq == 0 && q > dq = enqueueOrder (setVisibleQty o dq) os `covers` "EIR-3"
+    | vq == 0 && q <= dq = enqueueOrder (setVisibleQty o q) os `covers` "EIR-2 DF-D-ob"
+    | vq == 0 && q > dq = enqueueOrder (setVisibleQty o dq) os `covers` "EIR-3 DF-D-ob"
     | otherwise = enqueueOrder o os `covers` "EIR-4"
   where
     q = quantity o

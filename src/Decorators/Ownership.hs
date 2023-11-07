@@ -40,14 +40,17 @@ ownershipCheckForArrivingOrder rq s rs = do
     let oldo = getOldOrder rs
     let s' = state rs
     let maxOwnershipPortion = ownershipUpperLimit s
-    if ownershipPreCheck maxOwnershipPortion o oldo s
-        then rs { state = updateOwnershipInfo (trades rs) s' } `covers` "OSC1"
+    result <- ownershipPreCheck maxOwnershipPortion o oldo s
+    if result
+        then do 
+            newState <- updateOwnershipInfo (trades rs) s'
+            rs { state = newState } `covers` "OSC1"
         else reject rq s `covers` "OSC2"
 
 
-updateOwnershipInfo :: [Trade] -> MEState -> MEState
+updateOwnershipInfo :: [Trade] -> MEState -> Coverage MEState
 updateOwnershipInfo ts state =
-    state {ownershipInfo = Prelude.foldl updateOwnership oi ts}
+    state {ownershipInfo = Prelude.foldl updateOwnership oi ts} `covers` "DF-D-ownership"
   where
     oi = ownershipInfo state
 
@@ -76,22 +79,36 @@ quantityInQueue o q =
     q
 
 
-ownershipPreCheck :: Float -> Order -> Maybe Order -> MEState -> Bool
-ownershipPreCheck maxOwnershipPortion o oldOrder state = do
-    shi `member` ownership && case side o of
-        Buy  -> ownedQty + newOrderQty + bookedBuyQty - bookedOrderQty < maxOwnership
-        Sell -> newOrderQty + bookedSellQty - bookedOrderQty <= ownedQty
-  where
-    shi = shid o
-    ownership = ownershipInfo state
-    ownedQty = ownership!shi
-    ob = orderBook state
-    newOrderQty = quantity o
-    bookedOrderQty = quantityInBook oldOrder ob
-    bookedBuyQty = totalQuantityInQueue Buy shi ob
-    bookedSellQty = totalQuantityInQueue Sell shi ob
-    shares = totalShares state
-    maxOwnership = floor $ fromIntegral shares * maxOwnershipPortion
+ownershipPreCheck :: Float -> Order -> Maybe Order -> MEState -> Coverage Bool
+ownershipPreCheck maxOwnershipPortion o oldOrder state 
+    | s == Buy = do 
+        if shi `member` ownership
+            then (ownedQty + newOrderQty + bookedBuyQty - bookedOrderQty < maxOwnership) `covers` "DF-U-ownership"
+            else False `covers` "DF-tau"
+    | s == Sell = do 
+        if shi `member` ownership
+            then  (newOrderQty + bookedSellQty - bookedOrderQty <= ownedQty) `covers` "DF-U-ownership"
+            else False `covers` "DF-tau"
+    where
+        s = side o
+        shi = shid o
+        ownership = ownershipInfo state
+        ownedQty = ownership!shi
+        ob = orderBook state
+        newOrderQty = quantity o
+        bookedOrderQty = quantityInBook oldOrder ob
+        bookedBuyQty = totalQuantityInQueue Buy shi ob
+        bookedSellQty = totalQuantityInQueue Sell shi ob
+        shares = totalShares state
+        maxOwnership = floor $ fromIntegral shares * maxOwnershipPortion
+
+
+
+
+    -- shi `member` ownership && case side o of
+        -- Buy  -> ownedQty + newOrderQty + bookedBuyQty - bookedOrderQty < maxOwnership
+        -- Sell -> newOrderQty + bookedSellQty - bookedOrderQty <= ownedQty
+ 
 
 
 totalQuantityInQueue :: Side -> ShareholderID -> OrderBook -> Quantity
