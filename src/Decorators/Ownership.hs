@@ -5,6 +5,7 @@ import           Data.Map
 import           Domain.ME
 import           Infra.Coverage
 import           Infra.Decorator
+import           Control.Monad
 
 
 ownershipCheck :: Decorator
@@ -49,15 +50,16 @@ ownershipCheckForArrivingOrder rq s rs = do
 
 
 updateOwnershipInfo :: [Trade] -> MEState -> Coverage MEState
-updateOwnershipInfo ts state =
-    state {ownershipInfo = Prelude.foldl updateOwnership oi ts} `covers` "DF-D-ownership"
+updateOwnershipInfo ts state = do
+    newOwnershipState <- foldM updateOwnership oi ts
+    return state {ownershipInfo = newOwnershipState} 
   where
     oi = ownershipInfo state
 
 
-updateOwnership :: OwnershipInfo -> Trade -> OwnershipInfo
+updateOwnership :: OwnershipInfo -> Trade -> Coverage OwnershipInfo
 updateOwnership oi t =
-    adjust (+ q) bshid $ adjust (subtract q) sshid oi
+    (adjust (+ q) bshid $ adjust (subtract q) sshid oi) `covers` ("DF-D-ownership-" ++ show bshid ++ " DF-D-ownership-" ++ show sshid)
   where
     q = quantityTraded t
     bshid = buyerShId t
@@ -83,11 +85,11 @@ ownershipPreCheck :: Float -> Order -> Maybe Order -> MEState -> Coverage Bool
 ownershipPreCheck maxOwnershipPortion o oldOrder state 
     | s == Buy = do 
         if shi `member` ownership
-            then (ownedQty + newOrderQty + bookedBuyQty - bookedOrderQty < maxOwnership) `covers` "DF-U-ownership"
+            then (ownedQty + newOrderQty + bookedBuyQty - bookedOrderQty < maxOwnership) `covers` ("DF-U-ownership-" ++ show shi)
             else False `covers` "DF-tau"
     | s == Sell = do 
         if shi `member` ownership
-            then  (newOrderQty + bookedSellQty - bookedOrderQty <= ownedQty) `covers` "DF-U-ownership"
+            then  (newOrderQty + bookedSellQty - bookedOrderQty <= ownedQty) `covers` ("DF-U-ownership-" ++ show shi)
             else False `covers` "DF-tau"
     where
         s = side o
