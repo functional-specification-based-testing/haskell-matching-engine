@@ -27,7 +27,7 @@ creditLimitCheckForArrivingOrder :: Order -> MEState -> [Trade] -> MEState -> Co
 creditLimitCheckForArrivingOrder o beforeTradeState ts afterTradeState 
     | s == Buy = do 
         if  bri `Map.member` credits 
-            then  (creditInfo beforeTradeState Map.! bri >= creditSpentByBuyer bri ts + totalWorthInQueue Buy bri afterTrade) `covers` "DF-U-credit"
+            then  (creditInfo beforeTradeState Map.! bri >= creditSpentByBuyer bri ts + totalWorthInQueue Buy bri afterTrade) `covers` ("DF-U-credit-" ++ show bri)
             else  False `covers` "DF-tau"
     | s == Sell = do 
         if  bri `Map.member` credits
@@ -41,29 +41,27 @@ creditLimitCheckForArrivingOrder o beforeTradeState ts afterTradeState
 
 updateCreditInfo :: [Trade] -> MEState -> Coverage MEState
 updateCreditInfo ts s =
-    foldl updateCreditByTrade s ts `covers` "DF-U-credit DF-D-credit"
+    foldM updateCreditByTrade s ts
 
 
-updateCreditByTrade :: MEState -> Trade -> MEState
-updateCreditByTrade s t =
-    s''
-  where
-    s' = updateSellerCreditByTrade s t
-    s'' = updateBuyerCreditByTrade s' t
+updateCreditByTrade :: MEState -> Trade -> Coverage MEState
+updateCreditByTrade s t = do
+    s' <- updateSellerCreditByTrade s t
+    updateBuyerCreditByTrade s' t
 
 
-updateBuyerCreditByTrade :: MEState -> Trade -> MEState
+updateBuyerCreditByTrade :: MEState -> Trade -> Coverage MEState
 updateBuyerCreditByTrade state t =
-    state {creditInfo = Map.insert bid newCredit ci}
+    state {creditInfo = Map.insert bid newCredit ci} `covers` ("DF-U-credit-" ++ show bid ++ " DF-D-credit-" ++ show bid)
   where
     bid = buyerBrId t
     ci = creditInfo state
     newCredit = ci Map.! bid - valueTraded t
 
 
-updateSellerCreditByTrade :: MEState -> Trade -> MEState
+updateSellerCreditByTrade :: MEState -> Trade -> Coverage MEState
 updateSellerCreditByTrade state t =
-    state {creditInfo = Map.insert sid newCredit ci}
+    state {creditInfo = Map.insert sid newCredit ci} `covers` ("DF-U-credit-" ++ show sid ++ " DF-D-credit-" ++ show sid)
   where
     sid = sellerBrId t
     ci = creditInfo state
