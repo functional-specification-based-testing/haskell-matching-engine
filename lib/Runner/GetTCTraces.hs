@@ -8,7 +8,6 @@ import           Shahlaa
 
 import           Data.Time
 
-f a = a
 main :: IO()
 main = do
     startTime <- getCurrentTime

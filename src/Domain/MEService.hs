@@ -16,43 +16,43 @@ import           Control.DeepSeq
 
 
 handlerSeed :: Handler
-handlerSeed NewOrderRq {} s = NewOrderRs Accepted [] s
+handlerSeed NewOrderRq {} !s = NewOrderRs Accepted [] s
 
-handlerSeed ReplaceOrderRq {} s = ReplaceOrderRs Accepted Nothing [] s
+handlerSeed ReplaceOrderRq {} !s = ReplaceOrderRs Accepted Nothing [] s
 
-handlerSeed CancelOrderRq {} s = CancelOrderRs Accepted Nothing s 
+handlerSeed CancelOrderRq {} !s = CancelOrderRs Accepted Nothing s 
 
 
 newOrderHandler :: Handler
 newOrderHandler =
-    creditLimitProc `deepseq`
-    fillAndKillProc `deepseq`
-    minQuantityCheck `deepseq`
-    pricebandCheck `deepseq`
-    ownershipCheck `deepseq`
-    orderHandlerDecorator `deepseq`
-    validateOrder 
+    creditLimitProc $!!
+    fillAndKillProc $!!
+    minQuantityCheck $!!
+    pricebandCheck $!!
+    ownershipCheck $!!
+    orderHandlerDecorator $!!
+    validateOrder $!!
     handlerSeed
 
 
 cancelOrderHandler :: Handler
 cancelOrderHandler =
-    creditLimitProc `deepseq`
-    pricebandCheck `deepseq`
-    ownershipCheck `deepseq`
-    orderHandlerDecorator `deepseq`
-    validateOrder
+    creditLimitProc $!!
+    pricebandCheck $!!
+    ownershipCheck $!!
+    orderHandlerDecorator $!!
+    validateOrder $!!
     handlerSeed
 
 
 replaceOrderHandler :: Handler
 replaceOrderHandler =
-    creditLimitProc `deepseq`
-    fillAndKillProc `deepseq`
-    pricebandCheck `deepseq`
-    ownershipCheck `deepseq`
-    orderHandlerDecorator `deepseq`
-    validateOrder
+    creditLimitProc $!!
+    fillAndKillProc $!!
+    pricebandCheck $!!
+    ownershipCheck $!!
+    orderHandlerDecorator $!!
+    validateOrder $!!
     handlerSeed
 
 

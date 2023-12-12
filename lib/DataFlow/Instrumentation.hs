@@ -63,6 +63,7 @@ unsafeAddr a = I# (word2Int# (aToWord# (unsafeCoerce# a)))
 trace :: String -> String -> a -> a
 trace flag input body = unsafePerformIO $ do
  hPutStrLn stderr $! ((show $ unsafeAddr $! body) ++ "," ++ flag ++ "," ++  input)
+ --Writing to File is not The Problem appendFile "./out.txt" (flag ++ "," ++  input)
  return body
 
 plugin :: GHC.Plugin
@@ -82,7 +83,9 @@ pluginImpl ms tcGblEnv = do
   return tcGblEnv { GHC.tcg_binds = new_tcg_binds}
 
 addExprTrace :: GHC.LHsExpr GHC.GhcTc -> GHC.TcM (GHC.LHsExpr GHC.GhcTc)
-addExprTrace (GHC.L loc (GHC.HsIf p cond first second)) = do
+addExprTrace (GHC.L loc (GHC.HsIf p cond first second)) = 
+  --T.trace ("Trace IF: " ++  (GHC.renderWithContext GHC.defaultSDocContext( GHC.ppr loc ))) $ 
+  do
   new_first <- injectTrace "D" first
   new_second <- injectTrace "D" second
   return (GHC.L loc (GHC.HsIf p cond new_first new_second))
@@ -97,7 +100,9 @@ addExprTrace other =
   return other
 
 addMatchTrace :: GHC.LGRHS GHC.GhcTc (GHC.LHsExpr GHC.GhcTc) -> GHC.TcM (GHC.LGRHS GHC.GhcTc (GHC.LHsExpr GHC.GhcTc))
-addMatchTrace (GHC.L loc (GHC.GRHS p g body)) = do
+addMatchTrace (GHC.L loc (GHC.GRHS p g body)) = 
+  --T.trace ("Trace MT: " ++  (GHC.renderWithContext GHC.defaultSDocContext( GHC.ppr loc ))) $ 
+  do
   new_body <- injectTrace "D" body
   return (GHC.L loc (GHC.GRHS p g new_body))
 

@@ -11,10 +11,10 @@ import          Control.DeepSeq
 
 validateOrder :: Decorator
 validateOrder hdlr =
-    decorateOnAccept validatePriceWrapper `deepseq`
-    decorateOnAccept validateQtyWrapper `deepseq`
-    decorateOnAccept validateAttrConsistencyWrapper `deepseq`
-    decorateOnAccept validateOnReplaceWrapper `deepseq`
+    decorateOnAccept validatePriceWrapper $!!
+    decorateOnAccept validateQtyWrapper $!!
+    decorateOnAccept validateAttrConsistencyWrapper $!!
+    decorateOnAccept validateOnReplaceWrapper $!!
     hdlr
 
 
@@ -52,8 +52,8 @@ validateQty :: PartialDecorator
 validateQty !rq !s !rs
     | q <= 0 = reject rq s 
     | q `rem` lot /= 0 = reject rq s 
-    | not `deepseq` validateIcebergQty o = reject rq s 
-    | not `deepseq` validateMinQty o = reject rq s 
+    | not $!! validateIcebergQty o = reject rq s 
+    | not $!! validateMinQty o = reject rq s 
     | otherwise = rs
   where
     !o = order rq
@@ -95,8 +95,8 @@ validateAttrConsistencyWrapper _ _ !rs =
 
 validateAttrConsistency :: PartialDecorator
 validateAttrConsistency !rq !s !rs
-    | not `deepseq` validateFakWithIceberg o = reject rq s
-    | not `deepseq` validateFakWithMinQty o = reject rq s 
+    | not $!! validateFakWithIceberg o = reject rq s
+    | not $!! validateFakWithMinQty o = reject rq s 
     | otherwise = rs 
   where
     !o = order rq
@@ -132,7 +132,7 @@ validateOnReplaceWrapper _ _ !rs =
 
 validateOnReplace :: PartialDecorator
 validateOnReplace !rq !s !rs
-    | not `deepseq` allowMinQty o = reject rq s 
+    | not $!! allowMinQty o = reject rq s 
     | otherwise = rs
   where
     !o = order rq
