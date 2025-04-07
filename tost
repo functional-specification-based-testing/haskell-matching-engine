@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+cabal build GetTCTraces &&
+./dist-newstyle/build/x86_64-linux/ghc-9.4.8/me-haskell-0.1.0.0/x/GetTCTraces/build/GetTCTraces/GetTCTraces --trades testcases/test.json

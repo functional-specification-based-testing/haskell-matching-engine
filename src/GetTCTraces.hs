@@ -1,3 +1,11 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE OverloadedStrings #-}
+
+import Data.Aeson
+import qualified Data.ByteString.Lazy.Char8 as B
+import GHC.Generics
+
 import           Control.Monad
 import           System.Environment
 import           System.Exit
@@ -5,7 +13,7 @@ import           System.IO
 
 import           Domain.Parser
 import           Infra.Shahlaa
-
+import           Domain.ME
 
 main :: IO()
 main = do
@@ -23,13 +31,16 @@ main = do
 
     handle <- openFile addr ReadMode
     contents <- hGetContents handle
-    let rawRequests = lines contents
-    let requests = [genRequest rqid $ words rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
-    let tc = addOracle requests
 
-    if func == "--trades"
-        then putStrLn $ fTestCase tc
-        -- else putStrLn $ fCoverage $ coverage tc
-        else putStrLn $ fCoverageInOrder $ coverage tc
+    let parsed = B.pack contents
+    case eitherDecode parsed :: Either String [Request] of
+        Left err -> putStrLn $ "Parse error: " ++ err
+        Right rawRequests -> do
+            let requests = [assignId rqid rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
+            let tc = addOracle requests
+
+            if func == "--trades"
+                then putStrLn $ fTestCase tc
+                else putStrLn $ fCoverageInOrder $ coverage tc
 
     hClose handle
