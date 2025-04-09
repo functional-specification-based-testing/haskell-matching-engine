@@ -98,7 +98,6 @@ validateAttrConsistencyWrapper _ _ rs =
 validateAttrConsistency :: PartialDecorator
 validateAttrConsistency rq s rs
     | not $ validateFakWithIceberg o = reject rq s `covers` "VAL-AttrConsistency-iceberg-fak"
-    | not $ validateFakWithMinQty o = reject rq s `covers` "VAL-AttrConsistency-iceberg-min-qty"
     | otherwise = rs `covers` "VAL-AttrConsistency-passed"
   where
     o = order rq
@@ -112,16 +111,6 @@ validateFakWithIceberg order@IcebergOrder {} =
     not fak
   where
     fak = fillAndKill order
-
-
-validateFakWithMinQty :: Order -> Bool
-validateFakWithMinQty order =
-    case m of
-        Nothing -> True
-        Just _  -> not fak
-  where
-    fak = fillAndKill order
-    m = minQty order
 
 
 validateOnReplaceWrapper :: PartialDecorator

@@ -80,7 +80,7 @@ ownershipPreCheck :: Float -> Order -> Maybe Order -> MEState -> Bool
 ownershipPreCheck maxOwnershipPortion o oldOrder state = do
     shi `member` ownership && case side o of
         Buy  -> ownedQty + newOrderQty + bookedBuyQty - bookedOrderQty < maxOwnership
-        Sell -> newOrderQty + bookedSellQty - bookedOrderQty <= ownedQty
+        Sell -> newOrderQty + bookedSellQty - bookedOrderQty < ownedQty
   where
     shi = shid o
     ownership = ownershipInfo state
