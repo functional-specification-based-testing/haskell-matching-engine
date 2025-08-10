@@ -1,0 +1,1291 @@
+{
+  "coverage": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "CLP-AR",
+      "FKP-AR",
+      "MQC-AR",
+      "PBC-AR",
+      "OSC2",
+      "MNO",
+      "M-0",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-P",
+      "NO-RCV"
+    ],
+    [
+      "CLP1",
+      "FKP2",
+      "MQC1",
+      "PBC1",
+      "OSC1",
+      "MNO",
+      "M-0",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-P",
+      "NO-RCV"
+    ],
+    [
+      "CLP-P",
+      "PBC-P",
+      "OSC-P",
+      "CO-1",
+      "VAL-PR-P",
+      "VAL-QTY-P",
+      "VAL-AttrConsistency-P",
+      "VAL-Replace-P",
+      "CO-RCV"
+    ],
+    [
+      "CLP1",
+      "FKP2",
+      "MQC1",
+      "PBC1",
+      "OSC1",
+      "MNO",
+      "M-0",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-P",
+      "NO-RCV"
+    ],
+    [
+      "CLP1",
+      "FKP2",
+      "MQC1",
+      "PBC1",
+      "OSC1",
+      "MNO",
+      "M-1",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-P",
+      "NO-RCV"
+    ],
+    [
+      "CLP1",
+      "FKP4",
+      "PBC1",
+      "OSC1",
+      "MNO",
+      "M-2",
+      "CO-1",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-passed",
+      "RO-RCV"
+    ],
+    [
+      "CLP-AR",
+      "FKP-AR",
+      "MQC-AR",
+      "PBC-AR",
+      "OSC2",
+      "MNO",
+      "M-4",
+      "M-0",
+      "ELR-1",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-P",
+      "NO-RCV"
+    ],
+    [
+      "CLP1",
+      "FKP2",
+      "MQC1",
+      "PBC1",
+      "OSC1",
+      "MNO",
+      "M-0",
+      "VAL-PR-passed",
+      "VAL-QTY-passed",
+      "VAL-AttrConsistency-passed",
+      "VAL-Replace-P",
+      "NO-RCV"
+    ]
+  ],
+  "input": [
+    {
+      "newTickSize": 1,
+      "tag": "SetTickSizeRq"
+    },
+    {
+      "newLotSize": 1,
+      "tag": "SetLotSizeRq"
+    },
+    {
+      "newReferencePrice": 10,
+      "tag": "SetReferencePriceRq"
+    },
+    {
+      "newStaticPriceBandLowerLimit": 0.9,
+      "tag": "SetStaticPriceBandLowerLimitRq"
+    },
+    {
+      "newStaticPriceBandUpperLimit": 0.9,
+      "tag": "SetStaticPriceBandUpperLimitRq"
+    },
+    {
+      "newTotalShares": 100,
+      "tag": "SetTotalSharesRq"
+    },
+    {
+      "newOwnershipUpperLimit": 0.2,
+      "tag": "SetOwnershipUpperLimitRq"
+    },
+    {
+      "broker": 1,
+      "credit": 98,
+      "tag": "SetCreditRq"
+    },
+    {
+      "broker": 2,
+      "credit": 145,
+      "tag": "SetCreditRq"
+    },
+    {
+      "broker": 3,
+      "credit": 65,
+      "tag": "SetCreditRq"
+    },
+    {
+      "broker": 4,
+      "credit": 195,
+      "tag": "SetCreditRq"
+    },
+    {
+      "broker": 5,
+      "credit": 73,
+      "tag": "SetCreditRq"
+    },
+    {
+      "broker": 6,
+      "credit": 100,
+      "tag": "SetCreditRq"
+    },
+    {
+      "broker": 7,
+      "credit": 100,
+      "tag": "SetCreditRq"
+    },
+    {
+      "shareholder": 1,
+      "shares": 16,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "shareholder": 2,
+      "shares": 19,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "shareholder": 3,
+      "shares": 9,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "shareholder": 4,
+      "shares": 7,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "shareholder": 5,
+      "shares": 16,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "shareholder": 6,
+      "shares": 19,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "shareholder": 7,
+      "shares": 0,
+      "tag": "SetOwnershipRq"
+    },
+    {
+      "order": {
+        "brid": 2,
+        "disclosedQty": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 1,
+        "price": 10,
+        "quantity": 9,
+        "shid": 4,
+        "side": "Sell",
+        "tag": "IcebergOrder",
+        "visibleQty": 4
+      },
+      "tag": "NewOrderRq"
+    },
+    {
+      "order": {
+        "brid": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 2,
+        "price": 3,
+        "quantity": 2,
+        "shid": 3,
+        "side": "Sell",
+        "tag": "LimitOrder"
+      },
+      "tag": "NewOrderRq"
+    },
+    {
+      "oldOid": 2,
+      "oldSide": "Sell",
+      "rqId": 3,
+      "tag": "CancelOrderRq"
+    },
+    {
+      "order": {
+        "brid": 3,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 4,
+        "price": 9,
+        "quantity": 3,
+        "shid": 1,
+        "side": "Buy",
+        "tag": "LimitOrder"
+      },
+      "tag": "NewOrderRq"
+    },
+    {
+      "order": {
+        "brid": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 5,
+        "price": 10,
+        "quantity": 2,
+        "shid": 3,
+        "side": "Sell",
+        "tag": "LimitOrder"
+      },
+      "tag": "NewOrderRq"
+    },
+    {
+      "oldOid": 5,
+      "order": {
+        "brid": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 6,
+        "price": 3,
+        "quantity": 2,
+        "shid": 3,
+        "side": "Sell",
+        "tag": "LimitOrder"
+      },
+      "tag": "ReplaceOrderRq"
+    },
+    {
+      "order": {
+        "brid": 6,
+        "disclosedQty": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 7,
+        "price": 3,
+        "quantity": 19,
+        "shid": 6,
+        "side": "Sell",
+        "tag": "IcebergOrder",
+        "visibleQty": 4
+      },
+      "tag": "NewOrderRq"
+    },
+    {
+      "order": {
+        "brid": 7,
+        "disclosedQty": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 8,
+        "price": 3,
+        "quantity": 19,
+        "shid": 7,
+        "side": "Buy",
+        "tag": "IcebergOrder",
+        "visibleQty": 4
+      },
+      "tag": "NewOrderRq"
+    }
+  ],
+  "output": [
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetTickSizeRs"
+    },
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetLotSizeRs"
+    },
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetReferencePriceRs"
+    },
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetStaticPriceBandLowerLimitRs"
+    },
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetStaticPriceBandUpperLimitRs"
+    },
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetTotalSharesRs"
+    },
+    {
+      "state": {
+        "creditInfo": {},
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipUpperLimitRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {},
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetCreditRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "SetOwnershipRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Rejected",
+      "tag": "NewOrderRs",
+      "trades": []
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": [
+            {
+              "brid": 4,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 2,
+              "price": 3,
+              "quantity": 2,
+              "shid": 3,
+              "side": "Sell",
+              "tag": "LimitOrder"
+            }
+          ]
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "NewOrderRs",
+      "trades": []
+    },
+    {
+      "oldOrder": {
+        "brid": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 2,
+        "price": 3,
+        "quantity": 2,
+        "shid": 3,
+        "side": "Sell",
+        "tag": "LimitOrder"
+      },
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "CancelOrderRs"
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [
+            {
+              "brid": 3,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 4,
+              "price": 9,
+              "quantity": 3,
+              "shid": 1,
+              "side": "Buy",
+              "tag": "LimitOrder"
+            }
+          ],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "NewOrderRs",
+      "trades": []
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 65,
+          "4": 195,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [
+            {
+              "brid": 3,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 4,
+              "price": 9,
+              "quantity": 3,
+              "shid": 1,
+              "side": "Buy",
+              "tag": "LimitOrder"
+            }
+          ],
+          "sellQueue": [
+            {
+              "brid": 4,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 5,
+              "price": 10,
+              "quantity": 2,
+              "shid": 3,
+              "side": "Sell",
+              "tag": "LimitOrder"
+            }
+          ]
+        },
+        "ownershipInfo": {
+          "1": 16,
+          "2": 19,
+          "3": 9,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "NewOrderRs",
+      "trades": []
+    },
+    {
+      "oldOrder": {
+        "brid": 4,
+        "fillAndKill": false,
+        "minQty": null,
+        "oid": 5,
+        "price": 10,
+        "quantity": 2,
+        "shid": 3,
+        "side": "Sell",
+        "tag": "LimitOrder"
+      },
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 47,
+          "4": 213,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [
+            {
+              "brid": 3,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 4,
+              "price": 9,
+              "quantity": 1,
+              "shid": 1,
+              "side": "Buy",
+              "tag": "LimitOrder"
+            }
+          ],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 18,
+          "2": 19,
+          "3": 7,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "ReplaceOrderRs",
+      "trades": [
+        {
+          "buyId": 4,
+          "buyerBrId": 3,
+          "buyerShId": 1,
+          "priceTraded": 9,
+          "quantityTraded": 2,
+          "sellId": 6,
+          "sellerBrId": 4,
+          "sellerShId": 3
+        }
+      ]
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 47,
+          "4": 213,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [
+            {
+              "brid": 3,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 4,
+              "price": 9,
+              "quantity": 1,
+              "shid": 1,
+              "side": "Buy",
+              "tag": "LimitOrder"
+            }
+          ],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 18,
+          "2": 19,
+          "3": 7,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Rejected",
+      "tag": "NewOrderRs",
+      "trades": []
+    },
+    {
+      "state": {
+        "creditInfo": {
+          "1": 98,
+          "2": 145,
+          "3": 47,
+          "4": 213,
+          "5": 73,
+          "6": 100,
+          "7": 100
+        },
+        "lotSize": 1,
+        "orderBook": {
+          "buyQueue": [
+            {
+              "brid": 3,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 4,
+              "price": 9,
+              "quantity": 1,
+              "shid": 1,
+              "side": "Buy",
+              "tag": "LimitOrder"
+            },
+            {
+              "brid": 7,
+              "disclosedQty": 4,
+              "fillAndKill": false,
+              "minQty": null,
+              "oid": 8,
+              "price": 3,
+              "quantity": 19,
+              "shid": 7,
+              "side": "Buy",
+              "tag": "IcebergOrder",
+              "visibleQty": 4
+            }
+          ],
+          "sellQueue": []
+        },
+        "ownershipInfo": {
+          "1": 18,
+          "2": 19,
+          "3": 7,
+          "4": 7,
+          "5": 16,
+          "6": 19,
+          "7": 0
+        },
+        "ownershipUpperLimit": 0.2,
+        "referencePrice": 10,
+        "staticPriceBandLowerLimit": 0.9,
+        "staticPriceBandUpperLimit": 0.9,
+        "tickSize": 1,
+        "totalShares": 100
+      },
+      "status": "Accepted",
+      "tag": "NewOrderRs",
+      "trades": []
+    }
+  ]
+}

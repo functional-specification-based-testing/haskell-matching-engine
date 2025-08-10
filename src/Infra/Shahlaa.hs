@@ -1,3 +1,7 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Infra.Shahlaa
     ( addOracle
     , coverage
@@ -10,18 +14,20 @@ import           Control.Monad.Trans.State
 import qualified Data.Map                  as Map
 import qualified Data.Set                  as Set
 import           Text.Printf
+import           Data.Aeson (ToJSON, FromJSON)
 
 import           Domain.ME
 import           Domain.MEService
 import           Domain.Printer
 import           Infra.Coverage
+import GHC.Generics (Generic)
 
 
 data TestCase = TestCase
     { input    :: [Request]
     , output   :: [Response]
     , coverage :: [CoverageInfo]
-    } deriving (Eq, Show)
+    } deriving (Eq, Show, Generic, ToJSON)
 
 
 type TestState = (MEState, [Response], [CoverageInfo])

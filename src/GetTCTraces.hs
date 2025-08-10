@@ -39,8 +39,9 @@ main = do
             let requests = [assignId rqid rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
             let tc = addOracle requests
 
-            if func == "--trades"
-                then putStrLn $ fTestCase tc
-                else putStrLn $ fCoverageInOrder $ coverage tc
+            B.putStrLn $ encode tc
+            -- if func == "--trades"
+            --     then B.putStrLn $ encode tc
+            --     else putStrLn $ fCoverageInOrder $ coverage tc
 
     hClose handle

@@ -57,7 +57,7 @@ type ShareholderID = Int
 type CreditInfo = Map.Map BrokerID Int
 type OwnershipInfo = Map.Map ShareholderID Int
 
-data Side = Buy | Sell deriving (Show, Eq, Ord, Generic, FromJSON)
+data Side = Buy | Sell deriving (Show, Eq, Ord, Generic, FromJSON, ToJSON)
 
 data Order = LimitOrder
     { oid         :: OrderID
@@ -87,14 +87,14 @@ data Order = LimitOrder
     , side        :: Side
     , minQty      :: Maybe Quantity
     , fillAndKill :: Bool
-    } deriving (Show, Eq, Generic, FromJSON)
+    } deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
 type OrderQueue = [Order]
 
 data OrderBook = OrderBook
     { buyQueue  :: OrderQueue
     , sellQueue :: OrderQueue
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
 
 data Trade = Trade
@@ -106,7 +106,7 @@ data Trade = Trade
     , buyerBrId      :: BrokerID
     , sellerShId     :: ShareholderID
     , sellerBrId     :: BrokerID
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
 
 data MEState = MEState
@@ -120,7 +120,7 @@ data MEState = MEState
     , ownershipUpperLimit       :: Float
     , tickSize                  :: Price
     , lotSize                   :: Quantity
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Generic, ToJSON)
 
 
 initMEState :: MEState
@@ -156,9 +156,9 @@ data Request = NewOrderRq
     { newTickSize :: Price
     } | SetLotSizeRq
     { newLotSize :: Quantity
-    } deriving (Show, Eq, Generic, FromJSON)
+    } deriving (Show, Eq, Generic, FromJSON, ToJSON)
 
-data ResponseStatus = Accepted | Eliminated | Rejected deriving (Show, Eq)
+data ResponseStatus = Accepted | Eliminated | Rejected deriving (Show, Eq, Generic, ToJSON)
 
 data Response = NewOrderRs
     { status :: ResponseStatus
@@ -200,7 +200,7 @@ data Response = NewOrderRs
     } | SetLotSizeRs
     { status :: ResponseStatus
     , state  :: MEState
-    } deriving (Show, Eq)
+    } deriving (Show, Eq, Generic, ToJSON)
 
 
 reject :: Request -> MEState -> Response
