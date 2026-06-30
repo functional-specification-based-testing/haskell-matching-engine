@@ -2,6 +2,7 @@ module Domain.ME
     ( Order (..)
     , Quantity
     , Price
+    , OpeningPrice
     , TimeStamp
     , OrderID
     , BrokerID
@@ -12,6 +13,7 @@ module Domain.ME
     , OrderQueue
     , OrderBook (..)
     , Trade (..)
+    , MatchingType (..)
     , MEState (..)
     , Request (..)
     , Response (..)
@@ -34,6 +36,7 @@ module Domain.ME
     , setVisibleQty
     , enqueueOrder
     , replaceOrderInPlace
+    , calcOpeningPrice
     ) where
 
 import           Control.Exception (assert)
@@ -43,6 +46,7 @@ import qualified Data.Map          as Map
 
 type Quantity = Int
 type Price = Int
+type OpeningPrice = Maybe Price
 type TimeStamp = Int
 type OrderID = Int
 type BrokerID = Int
@@ -94,6 +98,9 @@ data Trade = Trade
     } deriving (Show, Eq)
 
 
+data MatchingType = Auction | Continuous deriving (Show, Read, Eq)
+
+
 data MEState = MEState
     { orderBook                 :: OrderBook
     , creditInfo                :: CreditInfo
@@ -105,11 +112,12 @@ data MEState = MEState
     , ownershipUpperLimit       :: Float
     , tickSize                  :: Price
     , lotSize                   :: Quantity
+    , matchingType              :: MatchingType
     } deriving (Show, Eq)
 
 
 initMEState :: MEState
-initMEState = MEState (OrderBook [] []) Map.empty Map.empty 10 0.9 0.9 100 0.2 1 1
+initMEState = MEState (OrderBook [] []) Map.empty Map.empty 10 0.9 0.9 100 0.2 1 1 Auction
 
 
 data Request = NewOrderRq
@@ -121,6 +129,8 @@ data Request = NewOrderRq
     } | ReplaceOrderRq
     { oldOid :: OrderID
     , order  :: Order
+    } | ChangeMatchingTypeRq
+    { newMatchingType :: MatchingType
     } | SetCreditRq
     { broker :: BrokerID
     , credit :: Int
@@ -160,6 +170,10 @@ data Response = NewOrderRs
     , oldOrder :: Maybe Order
     , trades   :: [Trade]
     , state    :: MEState
+    } | ChangeMatchingTypeRs
+    { status :: ResponseStatus
+    , trades :: [Trade]
+    , state  :: MEState
     } | SetCreditRs
     { status :: ResponseStatus
     , state  :: MEState
@@ -196,6 +210,8 @@ reject NewOrderRq {} = NewOrderRs Rejected []
 reject ReplaceOrderRq {} = ReplaceOrderRs Rejected Nothing []
 
 reject CancelOrderRq {} = CancelOrderRs Rejected Nothing
+
+reject ChangeMatchingTypeRq {} = ChangeMatchingTypeRs Rejected []
 
 reject SetCreditRq {} = SetCreditRs Rejected
 
@@ -394,3 +410,12 @@ updateOppositeQueueInBook o oq ob
 
 replaceOrderInPlace :: OrderID -> Order -> OrderBook -> (OrderBook, [Trade])
 replaceOrderInPlace ooid o ob = (replaceOrderInOrderBook ooid o ob, [])
+
+calcOpeningPrice :: MEState -> OpeningPrice
+calcOpeningPrice state
+    | matchingType state == Continuous = Nothing
+    | matchingType state == Auction = _calcOpeningPrice $ orderBook state
+
+
+_calcOpeningPrice :: OrderBook -> OpeningPrice
+_calcOpeningPrice _ = Just 1 -- TODO: Implement after finishing high level logics
