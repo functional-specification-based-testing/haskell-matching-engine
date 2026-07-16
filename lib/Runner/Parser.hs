@@ -11,6 +11,7 @@ genRequest rqid (t:spec)
     | t == "NewOrderRq" = NewOrderRq $ genOrder rqid spec
     | t == "ReplaceOrderRq" = genReplaceOrderRq rqid spec
     | t == "CancelOrderRq" = genCancelOrderRq rqid spec
+    | t == "ChangeMatchingTypeRq" = genChangeMatchingTypeRq spec
     | t == "SetCreditRq" = genSetCreditRq spec
     | t == "SetOwnershipRq" = genSetOwnershipRq spec
     | t == "SetReferencePriceRq" = genSetReferencePriceRq spec
@@ -34,6 +35,10 @@ indexRequests =
         then (i, h) : go (i + 1) j t
         else (j, h) : go i (j + 1) t
     go _ _ _     = []
+
+
+genChangeMatchingTypeRq :: [String] -> Request
+genChangeMatchingTypeRq (mt:_) = ChangeMatchingTypeRq (read mt :: MatchingType)
 
 
 genSetCreditRq :: [String] -> Request

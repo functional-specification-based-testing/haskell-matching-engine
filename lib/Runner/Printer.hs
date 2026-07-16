@@ -19,6 +19,9 @@ fRequest (CancelOrderRq rqid oid side) =
 fRequest (ReplaceOrderRq oldoid o) =
     printf "ReplaceOrderRq\t%d\t%s\n" oldoid $ fOrder o
 
+fRequest (ChangeMatchingTypeRq mt) =
+    printf "ChangeMatchingTypeRq\t%s\n" (show mt)
+
 fRequest (SetCreditRq b c) =
     printf "SetCreditRq\t%d\t%d\n" b c
 
@@ -57,6 +60,9 @@ fResponse (CancelOrderRs s _ statesnapshot) =
 fResponse (ReplaceOrderRs s _ ts statesnapshot) =
     printf "ReplaceOrderRs\t%s\n%s%s" (show s) (fTrades ts) (fState statesnapshot)
 
+fResponse (ChangeMatchingTypeRs s ts statesnapshot) = 
+    printf "ChangeMatchingTypeRs\t%s\n%s%s" (show s) (fTrades ts) (fState statesnapshot)
+
 fResponse (SetCreditRs s _) =
     printf "SetCreditRs\t%s\n" (show s)
 
@@ -87,7 +93,8 @@ fResponse (SetLotSizeRs s _) =
 
 fState :: MEState -> String
 fState state =
-    printf "%s%s%s%s%s%s%s"
+    printf "%s%s%s%s%s%s%s%s"
+    (fMatchingType state)
     (fOrderBook $ orderBook state)
     (fCreditInfo $ creditInfo state)
     (fOwnershipInfo $ ownershipInfo state)
@@ -132,6 +139,11 @@ fTrades :: [Trade] -> String
 fTrades ts = foldl (++) (printf "\tTrades\t%d\n" $ length ts) $ map fTrade ts
 
 
+fMatchingType :: MEState -> String
+fMatchingType state 
+    | matchingType state == Auction = printf "\tMatchingType\tAuction\n\tOpeningPrice\t%s\n" (fOpeningPrice $ calcOpeningPrice state)
+    | matchingType state == Continuous = "\tMatchingType\tContinuous\n"
+
 fOrderBook :: OrderBook -> String
 fOrderBook (OrderBook bq sq) = foldl (++) (printf "\tOrders\t%d\n" $ length bq + length sq) $ map (printf "\tOrder\t%s\n" . fOrder) $ bq ++ sq
 
@@ -158,3 +170,7 @@ fTickSize = printf "\tTickSize\t%d\n"
 
 fLotSize :: Quantity -> String
 fLotSize = printf "\tLotSize\t%d\n"
+
+fOpeningPrice :: OpeningPrice -> String
+fOpeningPrice Nothing = ""
+fOpeningPrice (Just p) = show p
