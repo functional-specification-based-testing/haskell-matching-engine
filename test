@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 cabal build GetTCTraces &&
-./GetTCTraces --trades testcases/test1.txt > testcases/sink &&
-diff -1 testcases/test1_res.txt testcases/sink | colordiff | diff-highlight
+cabal run GetTCTraces -- --trades testcases/test1.txt > testcases/sink &&
+colordiff -1 testcases/test1_res.txt testcases/sink 

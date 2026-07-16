@@ -1,3 +1,4 @@
+ChangeMatchingTypeRq Continuous
 SetTickSizeRq   1
 SetLotSizeRq   1
 SetReferencePriceRq   10

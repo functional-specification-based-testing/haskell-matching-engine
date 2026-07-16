@@ -1,4 +1,5 @@
-29
+30
+ChangeMatchingTypeRq	Continuous
 SetTickSizeRq	1
 SetLotSizeRq	1
 SetReferencePriceRq	10
@@ -28,6 +29,19 @@ NewOrderRq		Limit	5	4	3	10	2	SELL	0	---	0
 ReplaceOrderRq	5	Limit	6	4	3	3	2	SELL	0	---	0
 NewOrderRq		Iceberg	7	6	6	3	19	SELL	0	---	4
 NewOrderRq		Iceberg	8	7	7	3	19	BUY 	0	---	4
+ChangeMatchingTypeRs	Accepted
+	Trades	0
+	MatchingType	Continuous
+	Orders	0
+	Credits	0
+	Ownerships	0
+	ReferencePrice	10
+	StaticPriceBandLowerLimit	0.9
+	StaticPriceBandUpperLimit	0.9
+	TotalShares	100
+	OwnershipUpperLimit	0.2
+	TickSize	1
+	LotSize	1
 SetTickSizeRs	Accepted
 SetLotSizeRs	Accepted
 SetReferencePriceRs	Accepted
@@ -51,6 +65,7 @@ SetOwnershipRs	Accepted
 SetOwnershipRs	Accepted
 NewOrderRs	Rejected
 	Trades	0
+	MatchingType	Continuous
 	Orders	0
 	Credits	7
 	Credit	1	98
@@ -77,6 +92,7 @@ NewOrderRs	Rejected
 	LotSize	1
 NewOrderRs	Accepted
 	Trades	0
+	MatchingType	Continuous
 	Orders	1
 	Order	Limit	2	4	3	3	2	SELL	0	---	0
 	Credits	7
@@ -103,6 +119,7 @@ NewOrderRs	Accepted
 	TickSize	1
 	LotSize	1
 CancelOrderRs	Accepted
+	MatchingType	Continuous
 	Orders	0
 	Credits	7
 	Credit	1	98
@@ -129,6 +146,7 @@ CancelOrderRs	Accepted
 	LotSize	1
 NewOrderRs	Accepted
 	Trades	0
+	MatchingType	Continuous
 	Orders	1
 	Order	Limit	4	3	1	9	3	BUY 	0	---	0
 	Credits	7
@@ -156,6 +174,7 @@ NewOrderRs	Accepted
 	LotSize	1
 NewOrderRs	Accepted
 	Trades	0
+	MatchingType	Continuous
 	Orders	2
 	Order	Limit	4	3	1	9	3	BUY 	0	---	0
 	Order	Limit	5	4	3	10	2	SELL	0	---	0
@@ -185,6 +204,7 @@ NewOrderRs	Accepted
 ReplaceOrderRs	Accepted
 	Trades	1
 	Trade	9	2	4	6
+	MatchingType	Continuous
 	Orders	1
 	Order	Limit	4	3	1	9	1	BUY 	0	---	0
 	Credits	7
@@ -213,6 +233,7 @@ ReplaceOrderRs	Accepted
 NewOrderRs	Accepted
 	Trades	1
 	Trade	9	1	4	7
+	MatchingType	Continuous
 	Orders	1
 	Order	Iceberg	7	6	6	3	18	SELL	0	---	4
 	Credits	7
@@ -245,6 +266,7 @@ NewOrderRs	Accepted
 	Trade	3	4	8	7
 	Trade	3	4	8	7
 	Trade	3	2	8	7
+	MatchingType	Continuous
 	Orders	1
 	Order	Iceberg	8	7	7	3	1	BUY 	0	---	1
 	Credits	7

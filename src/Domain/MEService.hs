@@ -10,6 +10,7 @@ import           Decorators.Ownership
 import           Decorators.PriceBand
 import           Decorators.Validation
 import           Domain.ME
+import           Domain.Matching
 import           Infra.Coverage
 import           Infra.Decorator
 
@@ -64,6 +65,13 @@ requestHandler rq@CancelOrderRq {} s =
 
 requestHandler rq@ReplaceOrderRq {} s =
     replaceOrderHandler rq s
+
+requestHandler (ChangeMatchingTypeRq newt) s
+    | newt == matchingType s = ChangeMatchingTypeRs Rejected [] s `covers` "CMT-RJCT"
+    | newt == Auction = ChangeMatchingTypeRs Accepted [] s { matchingType = newt } `covers` "CMT-AUC-ACC"
+    | newt == Continuous = do 
+        (ob, ts) <- auctionMatch $ orderBook s
+        (ChangeMatchingTypeRs Accepted ts s {matchingType = newt, orderBook = ob}) `covers` "CMT-CON-ACC"
 
 requestHandler (SetCreditRq b c) s = do
     return (SetCreditRs Accepted s { creditInfo = insert b c (creditInfo s) })
