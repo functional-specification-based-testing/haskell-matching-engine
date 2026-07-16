@@ -36,7 +36,6 @@ module Domain.ME
     , setVisibleQty
     , enqueueOrder
     , replaceOrderInPlace
-    , calcOpeningPrice
     ) where
 
 import           Control.Exception (assert)
@@ -411,11 +410,3 @@ updateOppositeQueueInBook o oq ob
 replaceOrderInPlace :: OrderID -> Order -> OrderBook -> (OrderBook, [Trade])
 replaceOrderInPlace ooid o ob = (replaceOrderInOrderBook ooid o ob, [])
 
-calcOpeningPrice :: MEState -> OpeningPrice
-calcOpeningPrice state
-    | matchingType state == Continuous = Nothing
-    | matchingType state == Auction = _calcOpeningPrice $ orderBook state
-
-
-_calcOpeningPrice :: OrderBook -> OpeningPrice
-_calcOpeningPrice _ = Just 1 -- TODO: Implement after finishing high level logics

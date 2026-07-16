@@ -59,6 +59,7 @@ library MeDomain
     Decorators.Validation
     Domain.ME
     Domain.MEService
+    Domain.Matching
     Infra.Coverage
     Infra.Decorator
 
