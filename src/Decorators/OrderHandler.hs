@@ -9,11 +9,16 @@ import           Infra.Coverage
 import           Infra.Decorator
 
 
-newOrderMatcher :: Handler
-newOrderMatcher (NewOrderRq o) s = do
-    (ob, ts) <- continuousMatch o (orderBook s)
-    return (NewOrderRs Accepted ts s { orderBook = ob})
-
+newOrderHandler :: Handler
+newOrderHandler (NewOrderRq o) s 
+    | isContinuous = do
+        (ob, ts) <- continuousMatch o (orderBook s)
+        return (NewOrderRs Accepted ts s { orderBook = ob})
+    | otherwise = do 
+        let ob = enqueue (Just o) (orderBook s)
+        return (NewOrderRs Accepted [] s { orderBook = ob })
+    where
+        isContinuous = matchingType s == Continuous
 
 orderCanceller :: Handler
 orderCanceller (CancelOrderRq _ oid side) s = do
@@ -27,16 +32,23 @@ orderReplacer :: Handler
 orderReplacer rq@(ReplaceOrderRq oldoid oNotAdjusted) s = do
     let ob = orderBook s
     (ob', oldo) <- cancelOrder oldoid (side oNotAdjusted) ob
-    if isNothing oldo
-        then return $ reject rq s
-        else do
-            let oldOrder = fromJust oldo
-            if postponedCheckOnReplace oldOrder oNotAdjusted
-                then do
-                    let o = adjustPeakSizeOnReplace oldOrder oNotAdjusted
-                    (ob'', ts) <- if shouldSubstituteOrder oldOrder o then substituteOrder (oid oldOrder) o ob else continuousMatch o ob'
-                    return (ReplaceOrderRs Accepted oldo ts s { orderBook = ob''})
-                else return $ reject rq s
+    case oldo of
+        Nothing -> return $ reject rq s
+        Just oldOrder
+            | not (postponedCheckOnReplace oldOrder oNotAdjusted) -> return $ reject rq s
+            | matchingType s == Continuous -> do
+                let o = adjustPeakSizeOnReplace oldOrder oNotAdjusted
+                (ob'', ts) <- if shouldSubstituteOrder oldOrder o then substituteOrder (oid oldOrder) o ob else continuousMatch o ob'
+                return (ReplaceOrderRs Accepted oldo ts s { orderBook = ob'' })
+            | otherwise -> do
+                ob'' <-
+                    if shouldSubstituteOrder oldOrder oNotAdjusted
+                        then do
+                            (obSubstituted, _) <- substituteOrder (oid oldOrder) oNotAdjusted ob
+                            return obSubstituted
+                        else
+                            return (enqueue (Just oNotAdjusted) ob')
+                return (ReplaceOrderRs Accepted oldo [] s { orderBook = ob'' })
 
 
 substituteOrder :: OrderID -> Order -> OrderBook -> Coverage (OrderBook, [Trade])
@@ -50,7 +62,7 @@ orderHandlerDecorator =
 
 orderHandlerDecoratorOnAccept :: PartialDecorator
 orderHandlerDecoratorOnAccept rq@NewOrderRq{} s _ = do
-    newOrderMatcher rq s
+    newOrderHandler rq s
 
 orderHandlerDecoratorOnAccept rq@ReplaceOrderRq {} s _ = do
     orderReplacer rq s
