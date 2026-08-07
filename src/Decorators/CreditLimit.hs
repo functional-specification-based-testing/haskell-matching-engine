@@ -80,8 +80,18 @@ creditLimitProcByType rq@NewOrderRq {} s rs =
 creditLimitProcByType rq@ReplaceOrderRq {} s rs =
     creditLimitProcForArrivingOrder rq s rs
 
+creditLimitProcByType rq@(ChangeMatchingTypeRq newt) s rs
+    | newt == Continuous = creditLimitProcForOpening rq s rs
+    | otherwise = rs `covers` "CLP-P"
+
 creditLimitProcByType _ _ rs =
     rs `covers` "CLP-P"
+
+
+creditLimitProcForOpening :: PartialDecorator
+creditLimitProcForOpening _ _ rs = do 
+    newState <- updateCreditInfo (trades rs) (state rs)
+    rs { state = newState } `covers` "CLP-opening"
 
 
 creditLimitProcForArrivingOrder :: PartialDecorator

@@ -21,6 +21,8 @@ module Domain.ME
     , initMEState
     , limitOrder
     , icebergOrder
+    , isIceberg
+    , isAuction
     , trade
     , removeOrderFromOrderBook
     , valueTraded
@@ -264,8 +266,11 @@ icebergOrder i bi shi p q s m fak dq vq =
 isIceberg :: Order -> Bool
 isIceberg IcebergOrder {} = True
 
-isIceberg LimitOrder {}   = False
+isIceberg _   = False
 
+
+isAuction :: MEState -> Bool
+isAuction s = matchingType s == Auction
 
 displayedQty :: Order -> Quantity
 displayedQty o@IcebergOrder {} = visibleQty o

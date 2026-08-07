@@ -20,6 +20,10 @@ ownershipCheckByType rq@NewOrderRq {} s rs =
 ownershipCheckByType rq@ReplaceOrderRq {} s rs =
     ownershipCheckForArrivingOrder rq s rs
 
+ownershipCheckByType rq@(ChangeMatchingTypeRq newt) s rs
+    | newt == Continuous = ownershipCheckForOpening rq s rs
+    | otherwise = rs `covers` "OSC-P"
+
 ownershipCheckByType _ _ rs =
     rs `covers` "OSC-P"
 
@@ -33,6 +37,10 @@ getOldOrder rs@CancelOrderRs {} =
 
 getOldOrder _ =
     Nothing
+
+
+ownershipCheckForOpening :: PartialDecorator
+ownershipCheckForOpening rq s rs = rs `covers` "OSC-opening" -- TODO: Implement after gettig sure about logic
 
 
 ownershipCheckForArrivingOrder :: PartialDecorator

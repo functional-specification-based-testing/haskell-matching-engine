@@ -54,6 +54,7 @@ library MeDomain
     Decorators.FillAndKill
     Decorators.MinQuantity
     Decorators.OrderHandler
+    Decorators.AuctionHandler
     Decorators.Ownership
     Decorators.PriceBand
     Decorators.Validation

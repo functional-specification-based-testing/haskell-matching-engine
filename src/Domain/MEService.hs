@@ -6,6 +6,7 @@ import           Decorators.CreditLimit
 import           Decorators.FillAndKill
 import           Decorators.MinQuantity
 import           Decorators.OrderHandler
+import           Decorators.AuctionHandler
 import           Decorators.Ownership
 import           Decorators.PriceBand
 import           Decorators.Validation
@@ -22,9 +23,11 @@ handlerSeed ReplaceOrderRq {} s = ReplaceOrderRs Accepted Nothing [] s `covers` 
 
 handlerSeed CancelOrderRq {} s = CancelOrderRs Accepted Nothing s `covers` "CO-RCV"
 
+handlerSeed ChangeMatchingTypeRq {} s = ChangeMatchingTypeRs Accepted [] s `covers` "CMT-RCV"
 
-newOrderHandler :: Handler
-newOrderHandler =
+
+continuousNewOrderHandler :: Handler
+continuousNewOrderHandler =
     creditLimitProc $
     fillAndKillProc $
     minQuantityCheck $
@@ -45,8 +48,8 @@ cancelOrderHandler =
     handlerSeed
 
 
-replaceOrderHandler :: Handler
-replaceOrderHandler =
+continuousReplaceOrderHandler :: Handler
+continuousReplaceOrderHandler =
     creditLimitProc $
     fillAndKillProc $
     pricebandCheck $
@@ -56,22 +59,42 @@ replaceOrderHandler =
     handlerSeed
 
 
+auctionArrivingOrderHandler :: Handler
+auctionArrivingOrderHandler =
+    creditLimitProc $
+    -- pricebandCheck $ TODO: Is there any price band checking in auction
+    -- ownershipCheck $ TODO: How to do the ownership checking in auction
+    orderHandlerDecorator $
+    validateOrder
+    handlerSeed
+
+
+openingHandler :: Handler
+openingHandler =
+    creditLimitProc $
+    ownershipCheck $
+    auctionHandlerDecorator
+    handlerSeed
+
 requestHandler :: Handler
-requestHandler rq@NewOrderRq {} s =
-    newOrderHandler rq s
+requestHandler rq@NewOrderRq {} s
+    | isAuction s = auctionArrivingOrderHandler rq s
+    | otherwise = continuousNewOrderHandler rq s
 
 requestHandler rq@CancelOrderRq {} s =
     cancelOrderHandler rq s
 
-requestHandler rq@ReplaceOrderRq {} s =
-    replaceOrderHandler rq s
+requestHandler rq@ReplaceOrderRq {} s
+    | isAuction s = auctionArrivingOrderHandler rq s
+    | otherwise = continuousReplaceOrderHandler rq s
 
-requestHandler (ChangeMatchingTypeRq newt) s
+requestHandler rq@(ChangeMatchingTypeRq newt) s
     | newt == matchingType s = ChangeMatchingTypeRs Rejected [] s `covers` "CMT-RJCT"
     | newt == Auction = ChangeMatchingTypeRs Accepted [] s { matchingType = newt } `covers` "CMT-AUC-ACC"
     | newt == Continuous = do 
-        (ob, ts) <- auctionMatch $ orderBook s
-        (ChangeMatchingTypeRs Accepted ts s {matchingType = newt, orderBook = ob}) `covers` "CMT-CON-ACC"
+        rs <- openingHandler rq s
+        let s' = state rs
+        rs { state = s' { matchingType = newt } } `covers` "CMT-CON-ACC"
 
 requestHandler (SetCreditRq b c) s = do
     return (SetCreditRs Accepted s { creditInfo = insert b c (creditInfo s) })

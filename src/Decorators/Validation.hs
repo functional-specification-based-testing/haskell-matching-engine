@@ -34,13 +34,10 @@ validateMatchingType rq s rs
     | matchingType s == Continuous = rs `covers` "VAL-MatchingType-passed"
     | not $ allowMinQty o = reject rq s `covers` "VAL-MatchingType-has-minQyt-in-auction"
     | fillAndKill o = reject rq s `covers` "VAL-MatchingType-has-fak-in-auction"
-    | isIceberg = reject rq s `covers` "VAL-MatchingType-iceberge-order-in-auction"
+    | isIceberg o = reject rq s `covers` "VAL-MatchingType-iceberge-order-in-auction"
     | otherwise = rs `covers` "VAL-MatchingType-passed"
   where
     o = order rq
-    isIceberg = case o of
-        IcebergOrder {} -> True
-        _               -> False
 
 
 validatePriceWrapper :: PartialDecorator
