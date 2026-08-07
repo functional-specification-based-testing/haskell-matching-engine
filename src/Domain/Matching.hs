@@ -1,8 +1,10 @@
-module Domain.Matching 
+module Domain.Matching
     ( continuousMatch
     , auctionMatch
     , calcOpeningPrice
     ) where
+
+import Data.List (foldl')
 
 import Domain.ME
 import Infra.Coverage
@@ -12,9 +14,9 @@ continuousMatch :: Order -> OrderBook -> Coverage (OrderBook, [Trade])
 continuousMatch o ob = do
     let oq = oppositeSideQueue o ob
     (remo, oq', ts) <- _match o oq
-    let ob'=  updateOppositeQueueInBook o oq' ob 
-    let ob'' = enqueue remo ob' 
-    case remo of 
+    let ob'=  updateOppositeQueueInBook o oq' ob
+    let ob'' = enqueue remo ob'
+    case remo of
         Just remainder -> (ob'', ts) `covers` ("DF-D-ob-" ++ show (oid remainder))
         _ -> (ob'', ts) `covers` "DF-tau"
     -- (ob'', ts) `covers` "MNO"
@@ -24,8 +26,61 @@ auctionMatch :: OrderBook -> Coverage (OrderBook, [Trade])
 auctionMatch ob = (ob, []) `covers` "AM" -- TODO: Implement after finishing high level logics
 
 
-calcOpeningPrice :: OrderBook -> OpeningPrice
-calcOpeningPrice ob = Just 1 -- TODO: Implement after finishing high level logics
+calcOpeningPrice :: MEState -> OpeningPrice
+calcOpeningPrice s
+    | not $ isAuction s = Nothing
+    | null sq || null bq = Nothing
+    | sellBestPrice > buyBestPrice = Nothing
+    | otherwise = Just bestPrice
+    where
+        ob = orderBook s
+        sq = sellQueue ob
+        bq = buyQueue ob
+        sellBestPrice = price $ head sq
+        buyBestPrice = price $ head bq
+        refp = referencePrice s
+        tick = tickSize s
+        prices = [sellBestPrice, sellBestPrice + tick .. buyBestPrice]
+        bestPrice =foldl' (\best p -> if _isBetterOpeningPrice ob refp p best then p else best) sellBestPrice prices
+
+
+_isBetterOpeningPrice :: OrderBook -> Price -> Price -> Price -> Bool
+_isBetterOpeningPrice ob refp p1 p2
+    | tqp1 /= tqp2 = tqp1 > tqp2
+    | ntqp1 /= ntqp2 = ntqp1 < ntqp2
+    | otherwise = abs (p1 - refp) < abs (p2 - refp)
+    where
+        tqp1  = _canBeTradedQuantity ob p1
+        tqp2  = _canBeTradedQuantity ob p2
+        ntqp1 = _canNotBeTradedQuantity ob p1
+        ntqp2 = _canNotBeTradedQuantity ob p2
+
+
+_canBeTradedQuantity :: OrderBook -> Price -> Quantity
+_canBeTradedQuantity ob p = min sellQueueCanBeTradedQty buyQueueCanBeTradedQty
+    where
+        sellQueueCanBeTradedQty = _canBeMatchedWithPriceQuantity (sellQueue ob) p
+        buyQueueCanBeTradedQty = _canBeMatchedWithPriceQuantity (buyQueue ob) p
+
+
+_canNotBeTradedQuantity :: OrderBook -> Price -> Quantity
+_canNotBeTradedQuantity ob p = abs (sellQueueCanBeTradedQty - buyQueueCanBeTradedQty)
+    where
+        sellQueueCanBeTradedQty = _canBeMatchedWithPriceQuantity (sellQueue ob) p
+        buyQueueCanBeTradedQty = _canBeMatchedWithPriceQuantity (buyQueue ob) p
+
+
+_canBeMatchedWithPriceQuantity :: OrderQueue -> Price -> Quantity
+_canBeMatchedWithPriceQuantity oq p = sum $ map quantity $ filter (`_canBeMatchedWithPrice` p) oq
+
+
+_canBeMatchedWithPrice :: Order -> Price -> Bool
+_canBeMatchedWithPrice o p
+    | s == Buy  = op >= p
+    | s == Sell = op <= p
+    where
+        s = side o
+        op = price o
 
 
 _canBeMatchedWithOppositeQueueHead :: Order -> Order -> Bool
@@ -68,7 +123,7 @@ _match o oq@(h:os)
         newQueue <- _enqueueRemainder os $ decQty h newq
         (Nothing, newQueue, [trade headp newq o h]) `covers` "M-3"
     | newq > headq = do
-        newQueue <- (_enqueueRemainder os $ decQty h headq) 
+        newQueue <- (_enqueueRemainder os $ decQty h headq)
         (o', oq', ts') <- _match (decQty o headq) newQueue
         (o', oq', (trade headp headq o h):ts') `covers` "M-4"
   where

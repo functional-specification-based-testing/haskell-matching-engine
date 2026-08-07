@@ -393,16 +393,12 @@ enqueue (Just o)   = applyOnSameSideQueue (enqueueOrder o) o
 
 
 trade :: Price -> Quantity -> Order -> Order -> Trade
-trade p q newo oppositeo
-    | side newo == Buy  = Trade p q newi headi newshi newbi headshi headbi
-    | side newo == Sell = Trade p q headi newi headshi headbi newshi newbi
+trade p q o1 o2
+    | side o1 == side o2 = error "Orders sides are same"
+    | otherwise = Trade p q (oid bo) (oid so) (shid bo) (brid bo) (shid so) (brid so) 
   where
-    newi = oid newo
-    newshi = shid newo
-    newbi = brid newo
-    headi = oid oppositeo
-    headshi = shid oppositeo
-    headbi = brid oppositeo
+    bo = if side o1 == Buy then o1 else o2
+    so = if side o1 == Sell then o1 else o2
 
 
 updateOppositeQueueInBook :: Order -> OrderQueue -> OrderBook -> OrderBook

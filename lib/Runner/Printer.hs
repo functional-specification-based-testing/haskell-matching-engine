@@ -142,7 +142,7 @@ fTrades ts = foldl (++) (printf "\tTrades\t%d\n" $ length ts) $ map fTrade ts
 
 fMatchingType :: MEState -> String
 fMatchingType state 
-    | matchingType state == Auction = printf "\tMatchingType\tAuction\n\tOpeningPrice\t%s\n" (fOpeningPrice $ calcOpeningPrice $ orderBook state)
+    | matchingType state == Auction = printf "\tMatchingType\tAuction\n\tOpeningPrice\t%s\n" (fOpeningPrice $ calcOpeningPrice state)
     | matchingType state == Continuous = "\tMatchingType\tContinuous\n"
 
 fOrderBook :: OrderBook -> String
