@@ -14,7 +14,33 @@ validateOrder hdlr =
     decorateOnAccept "VAL-QTY" validateQtyWrapper $
     decorateOnAccept "VAL-AttrConsistency" validateAttrConsistencyWrapper $
     decorateOnAccept "VAL-Replace" validateOnReplaceWrapper $
+    decorateOnAccept "VAL-MatchingType" validateMatchingTypeWrapper 
     hdlr
+
+
+validateMatchingTypeWrapper :: PartialDecorator
+validateMatchingTypeWrapper rq@NewOrderRq{} s rs =
+    validateMatchingType rq s rs
+
+validateMatchingTypeWrapper rq@ReplaceOrderRq{} s rs =
+    validateMatchingType rq s rs
+
+validateMatchingTypeWrapper _ _ rs =
+    rs `covers` "VAL-MatchingType-P"
+
+
+validateMatchingType :: PartialDecorator
+validateMatchingType rq s rs
+    | matchingType s == Continuous = rs `covers` "VAL-MatchingType-passed"
+    | not $ allowMinQty o = reject rq s `covers` "VAL-MatchingType-has-minQyt-in-auction"
+    | fillAndKill o = reject rq s `covers` "VAL-MatchingType-has-fak-in-auction"
+    | isIceberg = reject rq s `covers` "VAL-MatchingType-iceberge-order-in-auction"
+    | otherwise = rs `covers` "VAL-MatchingType-passed"
+  where
+    o = order rq
+    isIceberg = case o of
+        IcebergOrder {} -> True
+        _               -> False
 
 
 validatePriceWrapper :: PartialDecorator
