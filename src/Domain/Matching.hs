@@ -22,8 +22,28 @@ continuousMatch o ob = do
     -- (ob'', ts) `covers` "MNO"
 
 
-auctionMatch :: OrderBook -> Coverage (OrderBook, [Trade])
-auctionMatch ob = (ob, []) `covers` "AM" -- TODO: Implement after finishing high level logics
+auctionMatch :: MEState -> Coverage (OrderBook, [Trade])
+auctionMatch s
+    | Nothing <- op = (ob, []) `covers` "AM-no-opening-price" -- TODO: What should happened when there is no opening price?
+    | Just p  <- op = _auctionMatchHelper [] ob p `covers` "AM-success"
+    where
+        op = calcOpeningPrice s
+        ob = orderBook s
+
+_auctionMatchHelper :: [Trade] -> OrderBook -> Price -> (OrderBook, [Trade])
+_auctionMatchHelper ts ob op
+    | not canMatch = (ob, ts)
+    | bqty == sqty = _auctionMatchHelper (trade op bqty bo so : ts) ob { buyQueue = tail bq, sellQueue = tail sq } op
+    | bqty  > sqty = _auctionMatchHelper (trade op sqty bo so : ts) ob { buyQueue = decQty bo sqty : tail bq, sellQueue = tail sq } op
+    | bqty  < sqty = _auctionMatchHelper (trade op bqty bo so : ts) ob { buyQueue = tail bq, sellQueue = decQty so bqty : tail sq } op
+    where
+        bq = buyQueue ob
+        sq = sellQueue ob
+        bo = head bq
+        so = head sq
+        bqty = quantity bo
+        sqty = quantity so
+        canMatch = (price bo >= op) && (price so <= op)
 
 
 calcOpeningPrice :: MEState -> OpeningPrice

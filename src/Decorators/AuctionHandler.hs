@@ -12,5 +12,5 @@ auctionHandlerDecorator =
 
 auctionHandlerDecoratorOnAccept :: PartialDecorator
 auctionHandlerDecoratorOnAccept _ s _ = do
-    (ob', ts) <- auctionMatch $ orderBook s
+    (ob', ts) <- auctionMatch s
     return (ChangeMatchingTypeRs Accepted ts s { orderBook = ob'})

@@ -11,14 +11,13 @@ import           Infra.Decorator
 
 newOrderHandler :: Handler
 newOrderHandler (NewOrderRq o) s 
-    | isContinuous = do
+    | not $ isAuction s = do
         (ob, ts) <- continuousMatch o (orderBook s)
         return (NewOrderRs Accepted ts s { orderBook = ob})
     | otherwise = do 
         let ob = enqueue (Just o) (orderBook s)
         return (NewOrderRs Accepted [] s { orderBook = ob })
-    where
-        isContinuous = matchingType s == Continuous
+
 
 orderCanceller :: Handler
 orderCanceller (CancelOrderRq _ oid side) s = do
