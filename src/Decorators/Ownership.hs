@@ -40,7 +40,9 @@ getOldOrder _ =
 
 
 ownershipCheckForOpening :: PartialDecorator
-ownershipCheckForOpening rq s rs = rs `covers` "OSC-opening" -- TODO: Implement after gettig sure about logic
+ownershipCheckForOpening rq s rs = do 
+    newState <- updateOwnershipInfo (trades rs) (state rs)
+    rs { state = newState } `covers` "OSC-opening"
 
 
 ownershipCheckForArrivingOrder :: PartialDecorator
@@ -53,7 +55,7 @@ ownershipCheckForArrivingOrder rq s rs = do
     if result
         then do 
             newState <- updateOwnershipInfo (trades rs) s'
-            rs { state = newState } `covers` "OSC1"
+            if isAuction s then rs `covers` "OSC3" else rs { state = newState } `covers` "OSC1"
         else reject rq s `covers` "OSC2"
 
 

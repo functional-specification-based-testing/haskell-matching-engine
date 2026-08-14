@@ -62,8 +62,8 @@ continuousReplaceOrderHandler =
 auctionArrivingOrderHandler :: Handler
 auctionArrivingOrderHandler =
     creditLimitProc $
-    -- pricebandCheck $ TODO: Is there any price band checking in auction
-    -- ownershipCheck $ TODO: How to do the ownership checking in auction
+    pricebandCheck $
+    ownershipCheck $
     orderHandlerDecorator $
     validateOrder
     handlerSeed
