@@ -1,4 +1,3 @@
-ChangeMatchingTypeRq Continuous
 SetTickSizeRq   1
 SetLotSizeRq   1
 SetReferencePriceRq   10
@@ -6,6 +5,33 @@ SetStaticPriceBandLowerLimitRq	0.9
 SetStaticPriceBandUpperLimitRq	0.9
 SetTotalSharesRq	100
 SetOwnershipUpperLimitRq 0.2
+
+# Auction matching scenarios
+SetCreditRq	1	200
+SetCreditRq	2	400
+SetCreditRq	3	365
+SetCreditRq	4	195
+SetOwnershipRq	1	20
+SetOwnershipRq	2	0
+SetOwnershipRq	3	4
+SetOwnershipRq	4	15
+NewOrderRq	2	4	10	10	False	0	False	4
+NewOrderRq	2	4	10	10	False	1	False	0
+NewOrderRq	2	4	10	10	False	0	True	0
+NewOrderRq	1	1	10	10	True	0	False	0
+NewOrderRq	1	2	10	20	True	0	False	0
+NewOrderRq	2	4	9	15	False	0	False	0
+NewOrderRq	1	2	10	10	True	0	False	0
+CancelOrderRq	7	True
+NewOrderRq	1	2	9	10	True	0	False	0
+NewOrderRq	3	3	15	15	True	0	False	0
+NewOrderRq	3	1	10	5	False	0	False	0
+ReplaceOrderRq	9	1	2	8	10	True	0	False	0
+
+# Continuous matching scenarios
+ChangeMatchingTypeRq Continuous
+CancelOrderRq	12	True
+CancelOrderRq	11	False
 SetCreditRq	1	98
 SetCreditRq	2	145
 SetCreditRq	3	65
@@ -22,9 +48,9 @@ SetOwnershipRq	6	19
 SetOwnershipRq	7	0
 NewOrderRq	2	4	10	9	False	0	False	4
 NewOrderRq	4	3	3	2	False	0	False	0
-CancelOrderRq	2	False
+CancelOrderRq	16	False
 NewOrderRq	3	1	9	3	True	0	False	0
 NewOrderRq	4	3	10	2	False	0	False	0
-ReplaceOrderRq	5	4	3	3	2	False	0	False	0
+ReplaceOrderRq	19	4	3	3	2	False	0	False	0
 NewOrderRq	6	6	3	19	False	0	False	4
 NewOrderRq	7	7	3	19	True	0	False	4

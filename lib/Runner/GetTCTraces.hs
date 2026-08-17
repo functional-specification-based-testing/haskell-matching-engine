@@ -7,6 +7,7 @@ import           Parser
 import           Shahlaa
 
 import           Data.Time
+import           Data.List (isPrefixOf)
 
 f a = a
 main :: IO()
@@ -21,7 +22,8 @@ main = do
 
     handle <- openFile addr ReadMode
     contents <- hGetContents handle
-    let rawRequests = lines contents
+    let rawLines = lines contents
+    let rawRequests = filter (\l -> not (null l) && not (isPrefixOf "#" l)) rawLines
     let requests = [genRequest rqid $ words rawRequest | (rqid, rawRequest) <- indexRequests rawRequests]
     let tc = addOracle requests
 
